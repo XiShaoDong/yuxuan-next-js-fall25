@@ -1,7 +1,12 @@
 import { ReactNode } from "react";
 import CourseNavigation from "./Navigation";
-export default function CoursesLayout(
-  { children, params }: Readonly<{ children: ReactNode; params: { cid: string }}> ) {
+
+type Props = {
+  children: ReactNode;
+  params: { cid: string };
+};
+
+export default function CoursesLayout({ children, params }: Props) {
  const { cid } = params;
  return (
    <div id="wd-courses">
