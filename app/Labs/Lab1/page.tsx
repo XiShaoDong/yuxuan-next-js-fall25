@@ -66,7 +66,7 @@ export default function Lab1() {
             <ul id="wd-my-books">
                 <li>Dune</li>
                 <li>Lord of the Rings</li>
-                <li>Ender&apos;s Game</li>
+                <li>Enders Game</li>
                 <li>Red Mars</li>
                 <li>The Forever War</li>
             </ul>
@@ -287,7 +287,7 @@ export default function Lab1() {
         <h4>Anchor tag</h4>
         Please
         <a href="https://github.com/XiShaoDong/yuxuan-next-js-fall25" id="wd-github">click here</a>
-        to go to this project&apos;s git repo<br/>
+        to go to this projects git repo<br/>
         Please
         <a href="https://www.lipsum.com" id="wd-lipsum">click here</a>
         to get dummy text<br/>
