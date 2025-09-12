@@ -1,3 +1,5 @@
+'use client'; 
+import Image from 'next/image';
 export default function Lab1() {
   return (
     <div id="wd-lab1">
@@ -64,6 +66,7 @@ export default function Lab1() {
             <ul id="wd-my-books">
                 <li>Dune</li>
                 <li>Lord of the Rings</li>
+
                 <li>Ender&apos;s Game</li>
                 <li>Red Mars</li>
                 <li>The Forever War</li>
@@ -88,16 +91,63 @@ export default function Lab1() {
                 <tr>
                 <td>Q1</td>
                 <td>HTML</td>
-                <td>2/3/21</td>
+                <td>2/3/25</td>
                 <td>85</td>
                 </tr>
                 <tr>
                 <td>Q2</td>
                 <td>CSS</td>
-                <td>2/10/21</td>
+                <td>2/10/25</td>
                 <td>90</td>
                 </tr>
-                <tr> ... </tr>
+                <tr>
+                <td>Q3</td>
+                <td>HTML</td>
+                <td>3/2/25</td>
+                <td>85</td>
+                </tr>
+                <tr>
+                <td>Q4</td>
+                <td>CSS</td>
+                <td>3/11/25</td>
+                <td>90</td>
+                </tr>
+                <tr>
+                <td>Q5</td>
+                <td>HTML</td>
+                <td>4/5/25</td>
+                <td>85</td>
+                </tr>
+                <tr>
+                <td>Q6</td>
+                <td>CSS</td>
+                <td>4/19/25</td>
+                <td>90</td>
+                </tr>
+                <tr>
+                <td>Q7</td>
+                <td>HTML</td>
+                <td>2/3/25</td>
+                <td>85</td>
+                </tr>
+                <tr>
+                <td>Q8</td>
+                <td>CSS</td>
+                <td>4/25/25</td>
+                <td>90</td>
+                </tr>
+                <tr>
+                <td>Q9</td>
+                <td>HTML</td>
+                <td>7/10/25</td>
+                <td>85</td>
+                </tr>
+                <tr>
+                <td>Q10</td>
+                <td>CSS</td>
+                <td>8/1/25</td>
+                <td>90</td>
+                </tr>
             </tbody>
             <tfoot>
                 <tr>
@@ -108,52 +158,15 @@ export default function Lab1() {
             </table>
         </div>
         <hr/>
-        {/* <div>
-
-            Table practice 
-            <table border={1} width="100%">
-                <thead>
-                    <th>r1</th>
-                    <th>r2</th>
-                    <th>r3</th>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>2</td>
-                        <td>3</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>2</td>
-                        <td>3</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>2</td>
-                        <td>3</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <td colSpan={2}>
-                        total
-                    </td>
-                    <td>
-                        0
-                    </td>
-                    
-                </tfoot>
-            </table>
-        </div> */}
         <hr/>
         <div id="wd-images">
           <h4>Image tag</h4>
             Loading an image from the internet: <br />
-            <img id="wd-starship" width="400px"   src="https://www.staradvertiser.com/wp-content/uploads/2021/08/web1_Starship-gap2.jpg" />
+            <Image id="wd-starship" width={400} height={200}alt='Start ship'  src="https://www.staradvertiser.com/wp-content/uploads/2021/08/web1_Starship-gap2.jpg" />
             <br />
             Loading a local image:
             <br />
-            <img id="wd-teslabot" src="/images/teslabot.jpg" height="200px" />
+            <Image id="wd-teslabot" alt="Tesla Bot" src="/images/teslabot.jpg" width={200} height={200} />
         </div>
         <hr/>
         <div id="wd-forms">
@@ -181,10 +194,14 @@ export default function Lab1() {
         <hr/>
         <h5 id="wd-buttons">Buttons</h5>
         <button type="button"
-                // onClick={() => alert("Life is Good!")}
+                onClick={() => alert("Life is Good!")}
                 id="wd-all-good">
             Hello World!
         </button>
+        <hr/>
+        <h5 id="wd-file-upload">File Upload</h5>
+        <input type="file"></input>
+
         <hr/>
         <h5 id="wd-radio-buttons">Radio buttons</h5>
 
@@ -268,8 +285,10 @@ export default function Lab1() {
             id="wd-text-fields-dob"/><br/>
 
         <hr/>
-        
         <h4>Anchor tag</h4>
+        Please
+        <a href="https://github.com/XiShaoDong/yuxuan-next-js-fall25" id="wd-github">click here</a>
+        to go to this projects git repo<br/>
         Please
         <a href="https://www.lipsum.com" id="wd-lipsum">click here</a>
         to get dummy text<br/>
