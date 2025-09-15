@@ -22,6 +22,10 @@ export default function TOC() {
                 <Link href="/" id="wd-lab3-link">
                     Kambaz </Link>
             </li>
+            <li>
+                <a href="https://github.com/XiShaoDong/yuxuan-next-js-fall25" id="wd-lab3-link">
+                    My Github Link</a>
+            </li>
         </ul>
     );
 }
