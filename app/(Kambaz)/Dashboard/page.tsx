@@ -18,9 +18,32 @@ export default function Dashboard() {
             </div>
           </Link>
         </div>
-        <div className="wd-dashboard-course"> ... </div>
-        <div className="wd-dashboard-course"> ... </div>
+        <div className="wd-dashboard-course">
+          <Link href="/Courses/2134" className="wd-dashboard-course-link">
+            <Image src="/images/teslabot.jpg" alt="Undecided Image" width={200} height={150} />
+            <div>
+              <h5> CS2134 Nodejs</h5>
+              <p className="wd-dashboard-course-title">
+                Full Stack software developer{" "}
+              </p>
+              <button> Go </button>
+            </div>
+          </Link>
+        </div>
+        <div className="wd-dashboard-course">
+          <Link href="/Courses/3124" className="wd-dashboard-course-link">
+            <Image src="/images/teslabot.jpg" alt="Undecided Image" width={200} height={150} />
+            <div>
+              <h5> CS3124  DataBase</h5>
+              <p className="wd-dashboard-course-title">
+                Full Stack software developer{" "}
+              </p>
+              <button> Go </button>
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
-);}
+  );
+}
 
