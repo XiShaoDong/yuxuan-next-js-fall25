@@ -12,7 +12,7 @@ export default function Home() {
             <button>
               View Progress
             </button>
-            <select>
+            <select defaultValue={"Publish All"}>
               <option value="Publish All">
                 Publish All
               </option>

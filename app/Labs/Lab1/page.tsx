@@ -176,13 +176,13 @@ export default function Lab1() {
                 <label htmlFor="wd-text-fields-username">Username:</label>
                 <input placeholder="jdoe" id="wd-text-fields-username" /> <br />
                 <label htmlFor="wd-text-fields-password">Password:</label>
-                <input type="password" value="123@#$asd" id="wd-text-fields-password" />
+                <input type="password" defaultValue="123@#$asd" id="wd-text-fields-password" />
                 <br />
                 <label htmlFor="wd-text-fields-first-name">First name:</label>
                 <input type="text" title="John" id="wd-text-fields-first-name" /> <br />
                 <label htmlFor="wd-text-fields-last-name">Last name:</label>
                 <input type="text" placeholder="Doe"
-                    value="Wonderland"
+                    defaultValue="Wonderland"
                     title="The last name"
                     id="wd-text-fields-last-name" />
                 <h5>Text boxes</h5>
@@ -238,10 +238,10 @@ export default function Lab1() {
 
         <h5>Select one</h5>
         <label  htmlFor="wd-select-one-genre"> Favorite movie genre: </label><br/>
-        <select id="wd-select-one-genre">
+        <select id="wd-select-one-genre" defaultValue={"SCIFI"}>
             <option value="COMEDY">Comedy</option>
             <option value="DRAMA">Drama</option>
-            <option selected value="SCIFI">
+            <option value="SCIFI">
                 Science Fiction</option>
             <option value="FANTASY">Fantasy</option>
         </select>
@@ -250,10 +250,10 @@ export default function Lab1() {
 
         <h5>Select many</h5>
         <label  htmlFor="wd-select-many-genre"> Favorite movie genres: </label><br/>
-        <select multiple id="wd-select-many-genre">
-            <option value="COMEDY" selected> Comedy          </option>
+        <select multiple id="wd-select-many-genre" defaultValue={["COMEDY","SCIFI"]}>
+            <option value="COMEDY"> Comedy          </option>
             <option value="DRAMA">           Drama           </option>
-            <option value="SCIFI"  selected> Science Fiction </option>
+            <option value="SCIFI" > Science Fiction </option>
             <option value="FANTASY">         Fantasy         </option>
         </select>
 
@@ -268,20 +268,20 @@ export default function Lab1() {
 
         <label htmlFor="wd-text-fields-salary-start"> Starting salary:</label>
         <input type="number"
-            value="100000"
+            defaultValue="100000"
             placeholder="1000"
             id="wd-text-fields-salary-start"/><br/>
 
         <label htmlFor="wd-text-fields-rating"> Rating: </label>
         <input type="range"
-            value="4"
+            defaultValue="4"
             max="5"
             placeholder="Doe"
             id="wd-text-fields-rating"/><br/>
 
         <label htmlFor="wd-text-fields-dob"> Date of birth: </label>
         <input type="date"
-            value="2000-01-21"
+            defaultValue="2000-01-21"
             id="wd-text-fields-dob"/><br/>
 
         <hr/>
