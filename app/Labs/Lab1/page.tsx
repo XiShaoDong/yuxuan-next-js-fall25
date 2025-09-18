@@ -45,7 +45,7 @@ export default function Lab1() {
             </ol>
         </div>
         
-        <div >
+        {/* <div >
             How to make pancakes without numbers:
             <ol  id="wd-your-favorite-recipe"  style={{ listStyleType: 'none', }}>
                 <li>Mix dry ingredients.</li>
@@ -58,7 +58,7 @@ export default function Lab1() {
                 <li>Serve and enjoy!</li>
             </ol>
 
-        </div>
+        </div> */}
         <hr/>
         <div>
             <h5>Unordered List Tag</h5>
