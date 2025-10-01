@@ -5,7 +5,7 @@ import { FaPlus } from 'react-icons/fa6';
 
 
 
-function ModuleControlButtons() {
+export default function ModuleControlButtons() {
   return (
     <div className="float-end">
       <GreenCheckmark />
@@ -15,4 +15,3 @@ function ModuleControlButtons() {
   )
 }
 
-export default ModuleControlButtons

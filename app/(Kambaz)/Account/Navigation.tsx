@@ -30,7 +30,7 @@ export default function AccountNavigation() {
                                     const isActive = pathname.match(link.href);
                                     return (
                                           <Link className={`list-group-item ${isActive ? "active" : "text-danger"} border-0`}
-                                                href={link.href}
+                                                href={link.href} key={link.href}
                                           >
                                                 {link.label}
                                           </Link>
