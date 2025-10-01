@@ -113,13 +113,22 @@ function BootstrapForms() {
                 <h2>Tabs</h2>
                 <Nav variant="tabs">
                     <NavItem>
-                        <NavLink href="#/Labs/Lab2/Active">Active</NavLink>
+                        <NavLink href="/Labs">Labs</NavLink>
                     </NavItem>
                     <NavItem>
-                        <NavLink href="#/Labs/Lab2/Link1">Link 1</NavLink>
+                        <NavLink href="/Labs/Lab1">Lab1</NavLink>
                     </NavItem>
                     <NavItem>
-                        <NavLink href="#/Labs/Lab2/Link2">Link 2</NavLink>
+                        <NavLink href="#Labs/Lab2">Lab2</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink href="/Labs/Lab3">Lab3</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink href="/Account">Kambaz</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink href="https://github.com/XiShaoDong">My Github Link</NavLink>
                     </NavItem>
                     <NavItem>
                         <NavLink href="#/Labs/Lab2/Disabled" disabled>Disabled</NavLink>

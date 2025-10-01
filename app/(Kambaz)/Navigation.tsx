@@ -12,9 +12,9 @@ export default function KambazNavigation() {
   const pathname = usePathname();
 
   const links = [
-    { href: "/Account", icon: <FaRegCircleUser className="fs-1" />, label: "Account", color: "white" },
+    { href: "/Account", icon: <FaRegCircleUser className="fs-1" />, label: "Account", color: "light" },
     { href: "/Dashboard", icon: <AiOutlineDashboard className="fs-1" />, label: "Dashboard", color: "danger" },
-    { href: "/Courses/123", icon: <LiaBookSolid className="fs-1" />, label: "Courses", color: "danger" },
+    { href: "/Courses/1234", icon: <LiaBookSolid className="fs-1" />, label: "Courses", color: "danger" },
     { href: "/Calendar", icon: <IoCalendarOutline className="fs-1" />, label: "Calendar", color: "danger" },
     { href: "/Inbox", icon: <FaInbox className="fs-1" />, label: "Inbox", color: "danger" },
     { href: "/Labs", icon: <LiaCogSolid className="fs-1" />, label: "Labs", color: "danger" },
@@ -23,7 +23,7 @@ export default function KambazNavigation() {
     <ListGroup className="rounded-0 position-fixed bottom-0 top-0 d-none d-md-block bg-black z-2" style={{ width: 120 }}>
       <ListGroupItem className="bg-black border-0 text-center" as="a"
         target="_blank" href="https://www.northeastern.edu/">
-        <img src="/images/NEU.png" width="75px" alt="Northeastern University" />
+        <img src="/images/Neu.png" width="75px" alt="Northeastern University" />
       </ListGroupItem>
 
       {links.map(link => {
@@ -46,58 +46,59 @@ export default function KambazNavigation() {
     </ListGroup>
   );
 
- return (
-   <ListGroup className="rounded-0 position-fixed bottom-0 top-0 d-none d-md-block bg-black z-2" style={{ width: 120 }}
-              id="wd-kambaz-navigation">
-     <ListGroupItem className="bg-black border-0 text-center" as="a"
-              target="_blank" href="https://www.northeastern.edu/" id="wd-neu-link">
-       <img src="/images/NEU.png" width="75px" alt="Northeastern University" />
-     </ListGroupItem>
-     <ListGroupItem className="border-0 bg-black text-center">
-       <Link href="/Account" id="wd-account-link" className="text-white text-decoration-none">
-         <FaRegCircleUser className="fs-1 text-white" />
-         
-         Account
-       </Link>
-     </ListGroupItem>
-     <ListGroupItem className="border-0 bg-white text-center">
-       <Link href="/Dashboard" id="wd-dashboard-link" className="text-danger text-decoration-none">
-         <AiOutlineDashboard className="fs-1 text-danger" />
-         
-         Dashboard
-       </Link>
-     </ListGroupItem>
+  // return (
+  //   <ListGroup className="rounded-0 position-fixed bottom-0 top-0 d-none d-md-block bg-black z-2" style={{ width: 120 }}
+  //     id="wd-kambaz-navigation">
+  //     <ListGroupItem className="bg-black border-0 text-center" as="a"
+  //       target="_blank" href="https://www.northeastern.edu/" id="wd-neu-link">
+  //       <img src="/images/NEU.png" width="75px" alt="Northeastern University" />
+  //     </ListGroupItem>
+  //     <ListGroupItem className="border-0 bg-black text-center">
+  //       <Link href="/Account" id="wd-account-link" className="text-white text-decoration-none">
+  //         <FaRegCircleUser className="fs-1 text-white" />
 
-     <ListGroupItem className="border-0 bg-black text-center">
-       <Link href="/Courses/123" id="wd-dashboard-link" className="text-danger text-decoration-none">
-         <LiaBookSolid className="fs-1 text-danger" />
-         
-         Courses
-       </Link>
-     </ListGroupItem>
+  //         Account
+  //       </Link>
+  //     </ListGroupItem>
+  //     <ListGroupItem className="border-0 bg-white text-center">
+  //       <Link href="/Dashboard" id="wd-dashboard-link" className="text-danger text-decoration-none">
+  //         <AiOutlineDashboard className="fs-1 text-danger" />
 
-     <ListGroupItem className="border-0 bg-black text-center">
-       <Link href="/Calendar" id="wd-dashboard-link" className="text-danger text-decoration-none">
-         <IoCalendarOutline className="fs-1 text-danger" />
-         
-         Calendar
-       </Link>
-     </ListGroupItem>
+  //         Dashboard
+  //       </Link>
+  //     </ListGroupItem>
 
-     <ListGroupItem className="border-0 bg-black text-center">
-       <Link href="/Inbox" id="wd-dashboard-link" className="text-danger text-decoration-none d-flex flex-column align-items-center">
+  //     <ListGroupItem className="border-0 bg-black text-center">
+  //       <Link href="/Courses/123" id="wd-dashboard-link" className="text-danger text-decoration-none">
+  //         <LiaBookSolid className="fs-1 text-danger" />
 
-         <FaInbox className="fs-1 text-danger"/>
-         
-         Inbox
-       </Link>
-     </ListGroupItem>
+  //         Courses
+  //       </Link>
+  //     </ListGroupItem>
 
-     <ListGroupItem className="border-0 bg-black text-center">
-       <Link href="/Labs" id="wd-dashboard-link" className="text-danger text-decoration-none d-flex flex-column align-items-center">
-         <LiaCogSolid className="fs-1 text-danger" />
-         Labs
-       </Link>
-     </ListGroupItem>
-   </ListGroup>
-);}
+  //     <ListGroupItem className="border-0 bg-black text-center">
+  //       <Link href="/Calendar" id="wd-dashboard-link" className="text-danger text-decoration-none">
+  //         <IoCalendarOutline className="fs-1 text-danger" />
+
+  //         Calendar
+  //       </Link>
+  //     </ListGroupItem>
+
+  //     <ListGroupItem className="border-0 bg-black text-center">
+  //       <Link href="/Inbox" id="wd-dashboard-link" className="text-danger text-decoration-none d-flex flex-column align-items-center">
+
+  //         <FaInbox className="fs-1 text-danger" />
+
+  //         Inbox
+  //       </Link>
+  //     </ListGroupItem>
+
+  //     <ListGroupItem className="border-0 bg-black text-center">
+  //       <Link href="/Labs" id="wd-dashboard-link" className="text-danger text-decoration-none d-flex flex-column align-items-center">
+  //         <LiaCogSolid className="fs-1 text-danger" />
+  //         Labs
+  //       </Link>
+  //     </ListGroupItem>
+  //   </ListGroup>
+  // );
+}

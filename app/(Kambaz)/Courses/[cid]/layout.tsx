@@ -10,16 +10,19 @@ export default async function CoursesLayout(
     <div id="wd-courses">
       <h2 className="text-danger">
         <FaAlignJustify className="me-4 fs-4 mb-1" />
-        Course {cid} </h2> <hr />
-        <div className="d-flex">
-          <div className="d-none d-md-block">
-            <CourseNavigation />
+        Course {cid} 
+      </h2> 
+      <hr />
+      <div className="d-flex">
+        <div className="d-none d-md-block">
+          <CourseNavigation />
 
         </div>
         <div className="flex-fill">
           {children}
-        </div></div>
-</div >
+        </div>
+      </div>
+    </div >
 
-);
+  );
 }
