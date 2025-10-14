@@ -1,6 +1,5 @@
 import React from 'react'
-import GreenCheckmark from '../Modules/GreenCheckmark'
-import { FaP, FaPlus } from 'react-icons/fa6'
+import { FaPlus } from 'react-icons/fa6'
 import { IoEllipsisVertical } from 'react-icons/io5'
 
 function AssignmentsButton() {

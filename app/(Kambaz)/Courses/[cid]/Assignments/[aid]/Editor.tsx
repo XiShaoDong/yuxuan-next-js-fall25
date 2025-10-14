@@ -1,17 +1,27 @@
 
 "use client"
+import { useParams } from "next/navigation";
 // import { Form, Button, } from "react-bootstrap";
 import { Form, Row, Col, Button } from "react-bootstrap";
+import * as db from "../../../../Database"
 export default function AssignmentEditor() {
-
+    const { cid, aid } = useParams()
+    const { assignments } = db
+    interface Assignment {
+        _id: string;
+        title: string;
+        course: string;
+      }
     return (
 
         <Form>
+            {assignments.filter((assignment: Assignment) => assignment._id === aid).map((assignment,index) => (
+                <Form.Group className="mb-3" controlId="wd-title" key={index}>
+                    <Form.Label>Assignment Name</Form.Label>
+                    <Form.Control type="text" defaultValue={assignment.title}></Form.Control>
+                </Form.Group>
+            ))}
 
-            <Form.Group className="mb-3" controlId="wd-title">
-                <Form.Label>Assignment Name</Form.Label>
-                <Form.Control type="text" defaultValue="A1 - ENV + HTML"></Form.Control>
-            </Form.Group>
 
             <Form.Group className="mb-3 w-100" controlId="wd-textarea">
                 <Form.Label></Form.Label>
@@ -113,8 +123,8 @@ export default function AssignmentEditor() {
 
             <hr />
             <div className="text-end">
-                <Button variant="secondary" className="me-2">Cancel</Button>
-                <Button variant="danger">Save</Button>
+                <Button variant="secondary" className="me-2" href={`/Courses/${cid}/Assignments`}>Cancel</Button>
+                <Button variant="danger" href={`/Courses/${cid}/Assignments`}>Save</Button>
             </div>
         </Form>
     );
