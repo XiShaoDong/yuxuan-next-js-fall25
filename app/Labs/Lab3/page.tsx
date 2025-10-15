@@ -29,6 +29,7 @@ import Highlight from "./Highlight";
 import PathParameters from "./PathParameters";
 import TodoItem from "./todos/TodoItem";
 import TodoList from "./todos/TodoList";
+import ArrowFunctions from "./ArrowFunctions";
 
 export default function Lab3() {
     console.log('Hello World!');
@@ -45,6 +46,7 @@ export default function Lab3() {
             <ConditionalOutputInline />
             <hr />
             <LegacyFunctions />
+            <ArrowFunctions/>
             <ImpliedReturn />
             <TemplateLiterals />
             <SimpleArrays />

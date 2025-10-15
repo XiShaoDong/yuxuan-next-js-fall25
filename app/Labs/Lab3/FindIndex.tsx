@@ -11,7 +11,7 @@ function FindIndex() {
     const string3Index = stringArray1.findIndex(a => a === 'string3');
     return (
         <div id="wd-find-index">
-            <h4>Find Function</h4>
+            <h4>FindIndex Function</h4>
             fourindex = {fourIndex} <br />
             string3index = {string3Index} <hr />
         </div>
