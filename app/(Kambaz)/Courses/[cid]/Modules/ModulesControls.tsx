@@ -1,6 +1,8 @@
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "react-bootstrap";
-import { FaPlus } from "react-icons/fa6";
+import { FaBan, FaPlus } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
+import { FaTimesCircle } from "react-icons/fa";
+import UnpublicIcon from "./UnpublicIcon";
 export default function ModulesControls() {
  return (
    <div id="wd-modules-controls" className="text-nowrap">
@@ -14,9 +16,6 @@ export default function ModulesControls() {
          <GreenCheckmark /> Publish All
        </DropdownToggle>
        <DropdownMenu>
-         <DropdownItem id="wd-publish-all">
-           <GreenCheckmark /> Publish All
-         </DropdownItem>
          <DropdownItem id="wd-publish-all-modules-and-items">
            <GreenCheckmark /> Publish all modules and items
          </DropdownItem>
@@ -25,11 +24,11 @@ export default function ModulesControls() {
          </DropdownItem>
             {/*  #Mark Finished to add two dropdown */}
          <DropdownItem id="wd-unpublish-all-modules-and-items">
-           <GreenCheckmark /> Unpublish all modules and items
+           <UnpublicIcon  /> Unpublish all modules and items
          </DropdownItem>
 
          <DropdownItem id="wd-unpublish-modules-only">
-           <GreenCheckmark /> Unpublish modules only
+           <UnpublicIcon /> Unpublish modules only
          </DropdownItem>
         
        </DropdownMenu>
