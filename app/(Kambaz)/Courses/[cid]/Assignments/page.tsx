@@ -32,7 +32,7 @@ export default function Assignments() {
                                         <Link href={`/Courses/${cid}/Assignments/${assignment._id}`} className="text-decoration-none text-body" >
                                             <b className="mb-0">{assignment.title}</b>
                                             <p className="mb-0 text-muted small">
-                                                <span className="text-danger">Multiplee Modules</span>| | <b>Not Available until</b> May 6 at 12:00am | <b>Due</b> May 13 at 11:59pm | 100pts
+                                                <span className="text-danger">Multiple Modules</span>| | <b>Not Available until</b> May 6 at 12:00am | <b>Due</b> May 13 at 11:59pm | 100pts
                                             </p>
                                         </Link>
                                     </div>
