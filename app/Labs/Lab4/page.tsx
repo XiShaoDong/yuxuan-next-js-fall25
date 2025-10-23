@@ -14,9 +14,9 @@ import ArrayStateVariable from './ArrayStateVariable'
 import ReduxExamples from "./ReduxExamples/page";
 import store from './store'
 import { Provider } from 'react-redux'
-import HelloRedux from './ReduxExamples/HelloRedux/page'
-import CounterRedux from './ReduxExamples/CounterRedux/page'
-import AddRedux from './ReduxExamples/AddRedux/page'
+import HelloRedux from './ReduxExamples/HelloRedux'
+import CounterRedux from './ReduxExamples/CounterRedux'
+import AddRedux from './ReduxExamples/AddRedux'
 import TodoList from './ReduxExamples/todos/TodoList'
 function page() {
     function sayHello() {

@@ -1,3 +1,4 @@
+"use client";
 import { Button, ListGroupItem } from "react-bootstrap";
 import { useDispatch, UseDispatch } from "react-redux";
 import { deleteTodo, setTodo } from "./todoReducer";
