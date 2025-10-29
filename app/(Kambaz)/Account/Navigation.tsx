@@ -1,44 +1,22 @@
 'use client'
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Nav, NavItem, NavLink } from "react-bootstrap";
+import { useSelector } from "react-redux";
+
 export default function AccountNavigation() {
+
+      const { currentUser } = useSelector((state: any) => state.accountReducer);
+      const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
       const pathname = usePathname();
-
-      const links = [
-            { href: "Signin", label: "Signin", color: "danger" },
-            { href: "Signup", label: "Singup", color: "danger" },
-            { href: "Profile", label: "Profile", color: "danger" },
-      ]
-
       return (
-            <div>
-                        
-                  {/* <div id="wd-account-navigation" className="wd list-group fs-5 rounded-0">
-                        <Link className="list-group-item active border-0"
-                              href="Signin"> Signin </Link>
-                        <Link className="list-group-item text-danger border-0"
-                              href="Signup"> Signup </Link>
-                        <Link className="list-group-item text-danger border-0"
-                              href="Profile"> Profile </Link>
-                  </div> */}
-                  <div id="wd-account-navigation" className="wd list-group fs-5 rounded-0">
-
-                        {
-                              links.map(link => {
-                                    const isActive = pathname.match(link.href);
-                                    return (
-                                          <Link className={`list-group-item ${isActive ? "active" : "text-danger"} border-0`}
-                                                href={link.href} key={link.href}
-                                          >
-                                                {link.label}
-                                          </Link>
-                                    );
-                              })
-
-                        }
-                  </div>
-            </div>
-
+            <Nav variant="pills">
+                  {links.map((link) => (
+                        <NavItem key={link}>
+                              <NavLink as={Link} href={link} active={pathname.endsWith(link.toLowerCase())}>
+                                    {link} </NavLink> </NavItem>
+                  ))}
+            </Nav>
 
       );
 }
