@@ -6,7 +6,6 @@ import * as db from "../../../../Database"
 import { updateAssignment, deleteAssignment, addAssignment } from "../reducer"
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { addAbortSignal } from "stream";
 import Link from "next/link";
 export default function AssignmentEditor() {
     const dispatch = useDispatch()
@@ -18,7 +17,7 @@ export default function AssignmentEditor() {
         title: string;
         course: string;
     }
-    const assignmentFromDb = assignments.filter((assignment: any) => assignment._id === aid)[0]
+    const assignmentFromDb = assignments.filter((assignment: Assignment) => assignment._id === aid)[0]
 
     const [assignment, setAssignment] = useState({
         title: "temp",
@@ -26,7 +25,9 @@ export default function AssignmentEditor() {
         startDate: "",
         dueDate: "",
         points: 100,
-        courseId: cid,
+        course: cid,
+        _id: aid,
+
     });
 
     useEffect(() => {
@@ -39,7 +40,8 @@ export default function AssignmentEditor() {
                 startDate: assignmentFromDb.startDate,
                 dueDate: assignmentFromDb.dueDate,
                 points: assignmentFromDb.points,
-                courseId: cid,
+                course: cid,
+                _id: aid,
             }
             setAssignment(assignment)
         }
@@ -51,6 +53,7 @@ export default function AssignmentEditor() {
         if (aid == "Temp") {
             dispatch(addAssignment(assignment));
         } else {
+            console.log(assignment)
             dispatch(updateAssignment(assignment));
         }
     }
@@ -80,8 +83,11 @@ export default function AssignmentEditor() {
                     Points
                 </Form.Label>
                 <Col sm={9}>
-                    <Form.Control type="text" value={assignment.points}
-                        onChange={(e) => setAssignment({ ...assignment, points: parseInt(e.target.value) })} />
+                    <Form.Control type="number" value={assignment.points}
+                        
+                        onChange={(e) => {
+                            const val = parseInt(e.target.value)
+                            setAssignment({ ...assignment, points: isNaN(val) ? 0 : val })}} />
                 </Col>
             </Form.Group>
 

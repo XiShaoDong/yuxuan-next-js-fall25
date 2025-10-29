@@ -3,12 +3,16 @@ import { assignments } from "../../../Database";
 import { v4 as uuidv4 } from "uuid";
 const initialState = {
     assignments: assignments,
+    // @Todo Maybe not neccessary, just prevent auto fetch from database
+    // assignments: [],
+
 };
 
 const assignmentSlice = createSlice({
     name: "assignments",
     initialState,
     reducers: {
+        // @Todo Maybe not neccessary, just prevent auto fetch from database
         setAssignments: (state, { payload }) => {
             state.assignments = payload;
           },
@@ -23,7 +27,7 @@ const assignmentSlice = createSlice({
                 points: 200
             };
             state.assignments = [...state.assignments, newAssignment] as any;
-            console.log("@Add assignment reducer", state.assignments, newAssignment );
+            // console.log("@Add assignment reducer", state.assignments, newAssignment );
 
         },
 
@@ -38,7 +42,7 @@ const assignmentSlice = createSlice({
                 // if right id update; not return original a
                 a._id === assignment._id ? assignment : a
             ) as any;
-            console.log("@Update assignment reducer", state.assignments );
+            console.log("@Update assignment reducer", assignment,  state.assignments );
 
         },
     },
