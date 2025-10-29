@@ -20,7 +20,7 @@ const assignmentSlice = createSlice({
             const newAssignment: any = {
                 _id: uuidv4(),
                 title: assignment.title,
-                course: assignment.courseId,
+                course: assignment.course,
                 description: assignment.description? assignment.description:"Welcome to assignment!",
                 startDate: assignment.dueDate? assignment.dueDate:"2025-09-11T12:00",
                 dueDate: assignment.startDate? assignment.startDate:"2025-10-11T12:00",
