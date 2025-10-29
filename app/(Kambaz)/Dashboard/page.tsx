@@ -6,20 +6,25 @@ import * as db from "../Database";
 import { v4 as uuidv4 } from "uuid";
 import { useDispatch, useSelector } from "react-redux";
 import { addNewCourse, deleteCourse, updateCourse } from "../Courses/reducer";
+
 export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const dispatch = useDispatch();
   const [course, setCourse] = useState<any>({
-    _id: "0", name: "New Course", number: "New Number",
-    startDate: "2023-09-10", endDate: "2023-12-15",
-    image: "/images/reactjs.jpg", description: "New Description"
+    _id: uuidv4(), 
+    name: "New Course", 
+    number: "New Number",
+    startDate: "2023-09-10", 
+    endDate: "2023-12-15",
+    image: "/images/reactjs.jpg", 
+    description: "New Description"
   });
 
   const imgStyle = { objectFit: "cover", objectPosition: "top center" } as const;
-  const repeatTimes = 9;
 
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { enrollments } = db;
+  if (!currentUser) return <p><Link href={`/Account/Signin`}>Please login</Link></p>;
   return (
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />

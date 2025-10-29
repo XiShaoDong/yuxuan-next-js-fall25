@@ -4,8 +4,9 @@ import CourseNavigation from "./Navigation";
 import { FaAlignJustify } from "react-icons/fa";
 import { courses } from "../../Database"
 import Breadcrumb from "./Breadcrumb";
-import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useSelector } from "react-redux";
 export default async function CoursesLayout(
   { children }: { children: ReactNode }) {
 
@@ -13,6 +14,8 @@ export default async function CoursesLayout(
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const course = courses.find((course: any) => course._id === cid);
 
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  if (!currentUser) return <p><Link href={`/Account/Signin`}>Please login</Link></p>;
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
