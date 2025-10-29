@@ -9,7 +9,7 @@ import { FormControl, Button } from "react-bootstrap";
 
 export default function Signin() {
 
-  const [credentials, setCredentials] = useState<any>({});
+  const [credentials, setCredentials] = useState<any>({username:"iron_man", password:"stark123"});
   const dispatch = useDispatch();
   const signin = () => {
     // alert("sigin")
@@ -30,13 +30,13 @@ export default function Signin() {
         <h2>Signin</h2>
         <FormControl id="wd-username"
           placeholder="username"
-          defaultValue={credentials.username}
+          value={credentials.username}
           onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
           className="mb-2" />
         <FormControl id="wd-password"
           placeholder="password" type="password"
           className="mb-2"
-          defaultValue={credentials.password}
+          value={credentials.password}
           onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
         />
         {/* <Link id="wd-signin-btn"
