@@ -49,7 +49,7 @@ export default function AssignmentEditor() {
             })
         }
         // fetchAssignments()
-    }, []);
+    }, [assignmentFromDb]);
 
     const onCreateAssignment = async (assignment: any) => {
         if (!cid) return;
@@ -59,13 +59,12 @@ export default function AssignmentEditor() {
     };
 
     const onUpdateAssignment = async (assignment: any) => {
-        await client.updateAssignment(assignment);
-        const newAssignment = assignment.map((a: any) => a._id === assignment._id ? assignment : a);
-        dispatch(updateAssignment(newAssignment));
+        const updated = await client.updateAssignment(assignment);
+        dispatch(updateAssignment(updated));
     };
 
     const onSave = (): void => {
-        if (aid === "Temp") {
+        if (!assignment._id || assignment._id === "Temp") {
             onCreateAssignment(assignment);
             console.log("@Create editorPage",assignment)
 
