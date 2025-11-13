@@ -12,17 +12,27 @@ import { useDispatch, useSelector } from "react-redux";
 import { setAssignments, deleteAssignment } from "./reducer";
 import { useEffect } from "react";
 import { DiSafari } from "react-icons/di";
+import * as client from "./client"
 
 export default function Assignments() {
     const { cid } = useParams()
 
-    const {assignments} = useSelector((state: any) => state.assignmentReducer);
+    const { assignments } = useSelector((state: any) => state.assignmentReducer);
     const dispatch = useDispatch();
     console.log(assignments)
 
-    function Data1(date: string){
-        return new Date(date)
-    }
+    const fetchAssignments = async () => {
+        const ass = await client.findMyAssignments(cid as string);
+        dispatch(setAssignments(ass));
+    };
+    const onRemoveAssignment = async (assignmentId: string) => {
+        await client.deleteAssignment(assignmentId);
+        dispatch(setAssignments(assignments.filter((a: any) => a._id !== assignmentId)));
+    };
+
+    useEffect(() => {
+        fetchAssignments();
+    }, []);
 
     // @Todo Maybe not neccessary, just prevent auto fetch from database
     // useEffect(()=>{
@@ -41,7 +51,7 @@ export default function Assignments() {
                 </ListGroupItem>
 
 
-                {assignments.filter((assignment: any) => assignment.course === cid).map((assignment: any, idx:number) => (
+                {assignments.filter((assignment: any) => assignment.course === cid).map((assignment: any, idx: number) => (
                     <ListGroupItem className="p-0" key={idx}>
                         <div className=" p-3 px-2 d-flex justify-content-between align-items-center">
                             <div className="d-flex align-items-center">
@@ -55,7 +65,7 @@ export default function Assignments() {
                                     </Link>
                                 </div>
                             </div>
-                            <AssignmentItemButtons assignmentId={assignment._id} deleteAssignment={(assignmentId)=>{dispatch(deleteAssignment(assignmentId))}}></AssignmentItemButtons>
+                            <AssignmentItemButtons assignmentId={assignment._id} deleteAssignment={(assignmentId) => { onRemoveAssignment(assignmentId) }}></AssignmentItemButtons>
                         </div>
                     </ListGroupItem>
                 ))
