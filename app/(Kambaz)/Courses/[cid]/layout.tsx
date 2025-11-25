@@ -20,9 +20,8 @@ export default async function CoursesLayout(
     <div id="wd-courses">
       <h2 className="text-danger">
         <FaAlignJustify className="me-4 fs-4 mb-1" />
-        {/* <Breadcrumb course={course} />
-         */}
-         {course?.name}
+        <Breadcrumb course={course} />
+         {/* {course?.name} */}
       </h2>
       <hr />
       <div className="d-flex">

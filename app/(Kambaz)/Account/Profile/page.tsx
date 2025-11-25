@@ -32,7 +32,7 @@ export default function Profile() {
   }, []);
 
   return (
-    <div id="wd-profile-screen" className="d-flex justify-content-center align-items-center ">
+    <div id="wd-profile-screen" className="d-flex justify-content-center align-items-center">
       <div className="card p-4 w-50">
 
         <h2>Profile</h2>
@@ -67,8 +67,8 @@ export default function Profile() {
               <option value="STUDENT">Student</option>
             </select>
             <div>
-              <button onClick={updateProfile} className="btn btn-primary w-100 mb-2"> Update </button>
-              <Button onClick={signout} className="w-100 mb-2" id="wd-signout-btn">
+              <Button onClick={updateProfile} className="btn btn-success w-100 mb-2"> Update </Button>
+              <Button onClick={signout} className="w-100 mb-2 btn-warning" id="wd-signout-btn">
                 Sign out
               </Button>
             </div>
