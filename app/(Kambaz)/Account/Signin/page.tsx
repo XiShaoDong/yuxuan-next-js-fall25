@@ -19,6 +19,8 @@ export default function Signin() {
     redirect("/Dashboard");
   };
 
+  console.log("@NEXT_PUBLIC_HTTP_SERVER:", process.env.NEXT_PUBLIC_HTTP_SERVER);
+
   return (
 
     <div id="wd-signin-screen" className="d-flex justify-content-center align-items-center mt-2">
