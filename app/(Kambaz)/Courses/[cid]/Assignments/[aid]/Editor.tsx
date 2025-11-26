@@ -36,13 +36,31 @@ export default function AssignmentEditor() {
         const ass = await client.findMyAssignments(cid as string);
         dispatch(setAssignments(ass));
     };
+
+    const formatForInput = (dateString: string) => {
+        if (!dateString) return "";
+        const d = new Date(dateString);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hour = String(d.getHours()).padStart(2, '0');
+        const minute = String(d.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hour}:${minute}`;
+    }
+
+    // datetime-local → ISODate
+    const toISODateString = (localDate: string) => {
+        if (!localDate) return "";
+        return new Date(localDate).toISOString();
+    }
+
     useEffect(() => {
         if (assignmentFromDb) {
             setAssignment({
                 title: assignmentFromDb.title,
                 description: assignmentFromDb.description || dummyText,
-                startDate: assignmentFromDb.startDate,
-                dueDate: assignmentFromDb.dueDate,
+                startDate: formatForInput(assignmentFromDb.startDate),
+                dueDate: formatForInput(assignmentFromDb.dueDate),
                 points: assignmentFromDb.points,
                 course: cid,
                 _id: aid,
@@ -53,7 +71,8 @@ export default function AssignmentEditor() {
 
     const onCreateAssignment = async (assignment: any) => {
         if (!cid) return;
-        const newAssignment = { title: assignment.title, course: cid };
+        const newAssignment = { title: assignment.title, course: cid, startDate: toISODateString(assignment.startDate),
+            dueDate: toISODateString(assignment.dueDate), points:assignment.points, description:assignment.description };
         const ass = await client.createAssignment(cid as string, newAssignment);
         dispatch(addAssignment(ass));
     };
@@ -66,11 +85,11 @@ export default function AssignmentEditor() {
     const onSave = (): void => {
         if (!assignment._id || assignment._id === "Temp") {
             onCreateAssignment(assignment);
-            console.log("@Create editorPage",assignment)
+            console.log("@Create editorPage", assignment)
 
         } else {
             onUpdateAssignment(assignment);
-            console.log("@update editorPage",assignment)
+            console.log("@update editorPage", assignment)
 
         }
     }

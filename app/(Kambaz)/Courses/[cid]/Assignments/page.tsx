@@ -34,12 +34,6 @@ export default function Assignments() {
         fetchAssignments();
     }, []);
 
-    // @Todo Maybe not neccessary, just prevent auto fetch from database
-    // useEffect(()=>{
-    //     if (!assignments || assignments.length === 0) {
-    //         dispatch(setAssignments(db.assignments))
-    //     }
-    // },[assignments,dispatch])
     return (
         <div id="wd-assignments">
             <AssignmentControls cid={cid} aid={"Temp"} ></AssignmentControls>
@@ -60,7 +54,8 @@ export default function Assignments() {
                                     <Link href={`/Courses/${cid}/Assignments/${assignment._id}`} className="text-decoration-none text-body" >
                                         <b className="mb-0">{assignment.title}</b>
                                         <p className="mb-0 text-muted small">
-                                            <span className="text-danger">Multiple Modules</span>| | <b>Not Available until</b> {assignment.startDate} | <b>Due</b> {assignment.dueDate} | {assignment.points}pts
+                                            {/* <span className="text-danger">Multiple Modules</span>|  */}
+                                            <b>Not Available until</b> {assignment.startDate?.slice(0, 16)} | <b>Due</b> {assignment.dueDate?.slice(0, 16)} | {assignment.points}pts
                                         </p>
                                     </Link>
                                 </div>
