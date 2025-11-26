@@ -34,6 +34,16 @@ export default function Assignments() {
         fetchAssignments();
     }, []);
 
+    const formatForDisplay = (dateString: string) => {
+        if (!dateString) return "";
+        const d = new Date(dateString);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hour = String(d.getHours()).padStart(2, '0');
+        const minute = String(d.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hour}:${minute}`;
+    }
     return (
         <div id="wd-assignments">
             <AssignmentControls cid={cid} aid={"Temp"} ></AssignmentControls>
@@ -55,7 +65,7 @@ export default function Assignments() {
                                         <b className="mb-0">{assignment.title}</b>
                                         <p className="mb-0 text-muted small">
                                             {/* <span className="text-danger">Multiple Modules</span>|  */}
-                                            <b>Not Available until</b> {assignment.startDate?.slice(0, 16)} | <b>Due</b> {assignment.dueDate?.slice(0, 16)} | {assignment.points}pts
+                                            <b>Not Available until</b> {formatForDisplay(assignment.startDate)} | <b>Due</b> {formatForDisplay(assignment.dueDate)} | {assignment.points}pts
                                         </p>
                                     </Link>
                                 </div>
