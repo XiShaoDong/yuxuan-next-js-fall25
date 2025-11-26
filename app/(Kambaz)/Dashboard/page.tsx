@@ -15,7 +15,7 @@ export default function Dashboard() {
   const imgStyle = { objectFit: "cover", objectPosition: "top center" } as const;
 
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const isFaculty = currentUser?.role !== "FACULTY";
+  const isFaculty = currentUser?.role === "FACULTY"||currentUser?.role === "AMIN";
   const [isEnrollPage, setIsEnrollPage] = useState(false);
 
   console.log("Dashbord", currentUser)
