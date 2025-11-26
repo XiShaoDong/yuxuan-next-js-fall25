@@ -39,58 +39,70 @@ export default function AssignmentEditor() {
 
     const formatForInput = (dateString: string) => {
         if (!dateString) return "";
-        
+
         // 创建 Date 对象
         const date = new Date(dateString);
-        
+
         // 检查是否为有效日期
         if (isNaN(date.getTime())) return "";
-        
+
         // 获取本地时区的年月日时分
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-        
+
         // 返回 datetime-local 格式: YYYY-MM-DDTHH:MM
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
-    
+
     // datetime-local → ISO string（保持本地时区）
     const toISODateString = (localDate: string) => {
         if (!localDate) return "";
-        
+
         // datetime-local 值如: "2024-12-25T14:30"
         // 创建 Date 对象（会使用本地时区）
         const date = new Date(localDate);
-        
+
         // 检查是否为有效日期
         if (isNaN(date.getTime())) return "";
-        
+
         // 转换为 ISO string（UTC 时间）
         return date.toISOString();
     }
 
     useEffect(() => {
-        if (assignmentFromDb) {
-            setAssignment({
-                title: assignmentFromDb.title,
-                description: assignmentFromDb.description || dummyText,
-                startDate: formatForInput(assignmentFromDb.startDate),
-                dueDate: formatForInput(assignmentFromDb.dueDate),
-                points: assignmentFromDb.points,
-                course: cid,
-                _id: aid,
-            })
-        }
-        // fetchAssignments()
-    }, [assignmentFromDb]);
+        const loadAssignment = async () => {
+            // 如果 store 中没有数据，先获取
+            if (!assignments || assignments.length === 0) {
+                await fetchAssignments();
+                return; // fetchAssignments 会触发 Redux 更新，然后重新渲染
+            }
+
+            // 从 store 中加载数据
+            if (assignmentFromDb) {
+                setAssignment({
+                    title: assignmentFromDb.title,
+                    description: assignmentFromDb.description || dummyText,
+                    startDate: formatForInput(assignmentFromDb.startDate),
+                    dueDate: formatForInput(assignmentFromDb.dueDate),
+                    points: assignmentFromDb.points,
+                    course: cid,
+                    _id: aid,
+                });
+            }
+        };
+
+        loadAssignment();
+    }, [assignmentFromDb, assignments.length, cid, aid]);
 
     const onCreateAssignment = async (assignment: any) => {
         if (!cid) return;
-        const newAssignment = { title: assignment.title, course: cid, startDate: toISODateString(assignment.startDate),
-            dueDate: toISODateString(assignment.dueDate), points:assignment.points, description:assignment.description };
+        const newAssignment = {
+            title: assignment.title, course: cid, startDate: toISODateString(assignment.startDate),
+            dueDate: toISODateString(assignment.dueDate), points: assignment.points, description: assignment.description
+        };
         const ass = await client.createAssignment(cid as string, newAssignment);
         dispatch(addAssignment(ass));
     };
