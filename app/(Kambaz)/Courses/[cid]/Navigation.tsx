@@ -12,7 +12,7 @@ export default function CourseNavigation({cid}:{cid:string}) {
       {
         links.map(link => {
           const href = link === "People"
-          ? `/Courses/${cid}/People/Table`
+          ? `/Courses/${cid}/People`
           : `/Courses/${cid}/${link}`;
           const isActive = pathname.startsWith(href)
           return (
