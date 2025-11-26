@@ -10,7 +10,7 @@ export const fetchAllAssignments = async () => {
 };
 
 export const findMyAssignments = async (courseId:string) => {
-    const { data } = await axiosWithCredentials.get(`${ASSIGNMENTS_API}/current/assignments/${courseId}`);
+    const { data } = await axiosWithCredentials.get(`${ASSIGNMENTS_API}/current/assignments/${courseId}`, { headers: { 'Cache-Control': 'no-store' } });
     return data;
 };
 
