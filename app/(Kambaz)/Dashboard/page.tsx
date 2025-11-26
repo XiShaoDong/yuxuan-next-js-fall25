@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addNewCourse, deleteCourse, updateCourse, setCourses } from "../Courses/reducer";
 
 import { addUserToCourse, removeUserFromCourse } from "./client";
+import { Cousine } from "next/font/google";
 
 export default function Dashboard() {
   const { courses } = useSelector((state: any) => state.coursesReducer);
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN";
   const [isEnrollPage, setIsEnrollPage] = useState(false);
+  const [enrolledCourse, setEnrolledCourse] = useState<any[]>([]);
 
   console.log("Dashbord", currentUser)
   const [course, setCourse] = useState<any>({
@@ -28,10 +30,12 @@ export default function Dashboard() {
     image: "/images/reactjs.jpg",
     description: "New Description"
   });
+
   const fetchCourses = async () => {
     try {
       const courses = await client.findMyCourses(currentUser);
       dispatch(setCourses(courses));
+      setEnrolledCourse(courses);
     } catch (error) {
       console.error(error);
     }
@@ -45,7 +49,6 @@ export default function Dashboard() {
       console.error(error);
     }
   }
-
 
   //@Lab5 
   const onAddNewCourse = async () => {
@@ -66,21 +69,25 @@ export default function Dashboard() {
     })));
   };
 
-  const onRemoveUser = async (course:any)=>{
-    await removeUserFromCourse(currentUser,course)
+  const onRemoveUser = async (course: any) => {
+    await removeUserFromCourse(currentUser, course);
+    setEnrolledCourse(enrolledCourse.filter((c: any) => c._id !== course._id));
   }
 
-  const onAddUser = async (course:any)=>{
-    await addUserToCourse(currentUser,course)
+  const onAddUser = async (course: any) => {
+    await addUserToCourse(currentUser, course);
+    setEnrolledCourse([...enrolledCourse, course]);
   }
 
   const onSwitchEnrollPage = async () => {
     if (isEnrollPage) {
-      fetchCourses();
+      // show enrolled course
+      dispatch(setCourses(enrolledCourse));
     } else {
-      fetchAllCourses();
+      // show all courses
+      await fetchAllCourses();
     }
-    setIsEnrollPage(!isEnrollPage)
+    setIsEnrollPage(!isEnrollPage);
   }
 
   useEffect(() => {
@@ -163,14 +170,14 @@ export default function Dashboard() {
                         </button>
                       </>}
                     {isEnrollPage &&
-                      <>
+                      <>{enrolledCourse.some((c: any) => c._id === course._id) ?
                         <button onClick={(event) => {
                           event.preventDefault();
                           onRemoveUser(course);
                         }} className="btn btn-danger float-end"
                           id="wd-delete-course-click">
                           Drop
-                        </button>
+                        </button> :
                         <button id="wd-edit-course-click"
                           onClick={(event) => {
                             event.preventDefault();
@@ -179,7 +186,7 @@ export default function Dashboard() {
                           className="btn btn-success me-2 float-end" >
                           Enroll
                         </button>
-
+                      }
                       </>}
 
                   </CardBody>
