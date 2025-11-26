@@ -11,6 +11,7 @@ import * as client from "../client"
 export default function AssignmentEditor() {
     const dispatch = useDispatch()
     const { cid, aid } = useParams()
+    const [isInitialized, setIsInitialized] = useState(false);
     const { assignments } = useSelector((state: any) => state.assignmentReducer)
     const dummyText = `The assignment is available online Submit alink to the landing page of your Webapplication running on Netlify. The landingpage should includethe following: Your fullname and section Links to each of the labassignments Link to the Kanbas applicNtionLinks to all relevant source code repositories The Kanbas application should include a linkto navigate back to the landing page.`
 
@@ -39,87 +40,73 @@ export default function AssignmentEditor() {
 
     const formatForInput = (dateString: string) => {
         if (!dateString) return "";
-
-        // 创建 Date 对象
-        const date = new Date(dateString);
-
-        // 检查是否为有效日期
-        if (isNaN(date.getTime())) return "";
-
-        // 获取本地时区的年月日时分
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-
-        // 返回 datetime-local 格式: YYYY-MM-DDTHH:MM
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
+        // ignore time zone
+        // "2024-12-25T14:30:00.000Z" → "2024-12-25T14:30"
+        return dateString.slice(0, 16);
     }
 
-    // datetime-local → ISO string（保持本地时区）
+    // datetime-local format → ISO 
     const toISODateString = (localDate: string) => {
         if (!localDate) return "";
-
-        // datetime-local 值如: "2024-12-25T14:30"
-        // 创建 Date 对象（会使用本地时区）
-        const date = new Date(localDate);
-
-        // 检查是否为有效日期
-        if (isNaN(date.getTime())) return "";
-
-        // 转换为 ISO string（UTC 时间）
-        return date.toISOString();
+        // "2024-12-25T14:30" → "2024-12-25T14:30:00.000Z"
+        return `${localDate}:00.000Z`;
     }
 
     useEffect(() => {
-        const loadAssignment = async () => {
-            // 如果 store 中没有数据，先获取
-            if (!assignments || assignments.length === 0) {
-                await fetchAssignments();
-                return; // fetchAssignments 会触发 Redux 更新，然后重新渲染
-            }
+        fetchAssignments();
+    }, [cid]);
 
-            // 从 store 中加载数据
-            if (assignmentFromDb) {
-                setAssignment({
-                    title: assignmentFromDb.title,
-                    description: assignmentFromDb.description || dummyText,
-                    startDate: formatForInput(assignmentFromDb.startDate),
-                    dueDate: formatForInput(assignmentFromDb.dueDate),
-                    points: assignmentFromDb.points,
-                    course: cid,
-                    _id: aid,
-                });
-            }
-        };
+    useEffect(() => {
+        if (assignmentFromDb && !isInitialized) {
+            setAssignment({
+                title: assignmentFromDb.title,
+                description: assignmentFromDb.description || dummyText,
+                startDate: formatForInput(assignmentFromDb.startDate),
+                dueDate: formatForInput(assignmentFromDb.dueDate),
+                points: Number(assignmentFromDb.points) || 100,
+                course: cid,
+                _id: aid,
+            });
+            setIsInitialized(true); 
+        }
+    }, [assignmentFromDb, isInitialized]);
 
-        loadAssignment();
-    }, [assignmentFromDb, assignments.length, cid, aid]);
+    useEffect(() => {
+        setIsInitialized(false);
+    }, [aid]);
 
     const onCreateAssignment = async (assignment: any) => {
         if (!cid) return;
         const newAssignment = {
-            title: assignment.title, course: cid, startDate: toISODateString(assignment.startDate),
-            dueDate: toISODateString(assignment.dueDate), points: assignment.points, description: assignment.description
+            title: assignment.title,
+            course: cid,
+            startDate: toISODateString(assignment.startDate),
+            dueDate: toISODateString(assignment.dueDate),
+            points: assignment.points,
+            description: assignment.description
         };
         const ass = await client.createAssignment(cid as string, newAssignment);
         dispatch(addAssignment(ass));
     };
 
     const onUpdateAssignment = async (assignment: any) => {
-        const updated = await client.updateAssignment(assignment);
+        const updatedAssignment = {
+            ...assignment,
+            startDate: toISODateString(assignment.startDate),
+            dueDate: toISODateString(assignment.dueDate)
+        };
+        const updated = await client.updateAssignment(updatedAssignment);
         dispatch(updateAssignment(updated));
     };
 
     const onSave = (): void => {
         if (!assignment._id || assignment._id === "Temp") {
             onCreateAssignment(assignment);
-            console.log("@Create editorPage", assignment)
+            // console.log("@Create editorPage", assignment)
 
         } else {
             onUpdateAssignment(assignment);
-            console.log("@update editorPage", assignment)
+            // console.log("@update editorPage", assignment)
 
         }
     }

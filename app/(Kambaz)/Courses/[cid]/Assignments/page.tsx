@@ -36,13 +36,8 @@ export default function Assignments() {
 
     const formatForDisplay = (dateString: string) => {
         if (!dateString) return "";
-        const d = new Date(dateString);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const hour = String(d.getHours()).padStart(2, '0');
-        const minute = String(d.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hour}:${minute}`;
+        // "2024-12-25T14:30:00.000Z" → "2024-12-25T14:30"
+        return dateString.slice(0, 16);
     }
     return (
         <div id="wd-assignments">
