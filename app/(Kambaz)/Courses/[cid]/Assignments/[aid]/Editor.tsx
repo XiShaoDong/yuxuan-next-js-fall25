@@ -39,19 +39,37 @@ export default function AssignmentEditor() {
 
     const formatForInput = (dateString: string) => {
         if (!dateString) return "";
-        const d = new Date(dateString);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const hour = String(d.getHours()).padStart(2, '0');
-        const minute = String(d.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hour}:${minute}`;
+        
+        // 创建 Date 对象
+        const date = new Date(dateString);
+        
+        // 检查是否为有效日期
+        if (isNaN(date.getTime())) return "";
+        
+        // 获取本地时区的年月日时分
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        // 返回 datetime-local 格式: YYYY-MM-DDTHH:MM
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
-
-    // datetime-local → ISODate
+    
+    // datetime-local → ISO string（保持本地时区）
     const toISODateString = (localDate: string) => {
         if (!localDate) return "";
-        return new Date(localDate).toISOString();
+        
+        // datetime-local 值如: "2024-12-25T14:30"
+        // 创建 Date 对象（会使用本地时区）
+        const date = new Date(localDate);
+        
+        // 检查是否为有效日期
+        if (isNaN(date.getTime())) return "";
+        
+        // 转换为 ISO string（UTC 时间）
+        return date.toISOString();
     }
 
     useEffect(() => {
