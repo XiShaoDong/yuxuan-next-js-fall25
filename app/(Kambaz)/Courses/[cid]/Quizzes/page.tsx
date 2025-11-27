@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { ListGroup, ListGroupItem, Badge } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
+import { HiOutlineRocketLaunch } from "react-icons/hi2";
 import { FaCheckCircle, FaBan } from "react-icons/fa";
 import { setQuizzes, deleteQuiz as deleteQuizAction, togglePublish } from "./reducer";
 import * as client from "./client";
@@ -15,21 +16,21 @@ import QuizContextMenu from "./QuizContextMenu";
 export default function Quizzes() {
     const { cid } = useParams();
     const dispatch = useDispatch();
-    
+
     const { quizzes } = useSelector((state: any) => state.quizzesReducer);
     const { currentUser } = useSelector((state: any) => state.accountReducer);
-    
+
     const isFaculty = currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN";
-    
+
     // Store student scores for each quiz
-    const [quizScores, setQuizScores] = useState<{[key: string]: any}>({});
+    const [quizScores, setQuizScores] = useState<{ [key: string]: any }>({});
 
     // Fetch quizzes for this course
     const fetchQuizzes = async () => {
         try {
             const courseQuizzes = await client.findQuizzesForCourse(cid as string);
             dispatch(setQuizzes(courseQuizzes));
-            
+
             // If student, fetch their scores for each quiz
             if (!isFaculty && currentUser) {
                 fetchStudentScores(courseQuizzes);
@@ -42,10 +43,10 @@ export default function Quizzes() {
     // Fetch student's latest attempt scores for all quizzes
     const fetchStudentScores = async (quizzesList: any[]) => {
         if (!currentUser) return;
-        
+
         try {
-            const scores: {[key: string]: any} = {};
-            
+            const scores: { [key: string]: any } = {};
+
             // Fetch latest attempt for each quiz
             for (const quiz of quizzesList) {
                 try {
@@ -58,7 +59,7 @@ export default function Quizzes() {
                     console.log(`No attempts for quiz ${quiz._id}`);
                 }
             }
-            
+
             setQuizScores(scores);
         } catch (error) {
             console.error("Error fetching student scores:", error);
@@ -125,7 +126,7 @@ export default function Quizzes() {
     return (
         <div id="wd-quizzes">
             {isFaculty && <QuizControls />}
-            
+
             {quizzes.length === 0 ? (
                 <div className="text-center my-5">
                     <h4>No quizzes yet</h4>
@@ -144,35 +145,17 @@ export default function Quizzes() {
 
                     {quizzes.map((quiz: any) => {
                         const studentAttempt = quizScores[quiz._id];
-                        
+
                         return (
                             <ListGroupItem key={quiz._id} className="p-0">
-                                <div className="p-3 d-flex justify-content-between align-items-center">
-                                    <div className="d-flex align-items-start flex-grow-1">
-                                        <BsGripVertical className="me-2 fs-3 mt-1" />
-                                        
-                                        {/* Publish Status Icon (Faculty only) */}
-                                        {isFaculty && (
-                                            <div className="me-3">
-                                                {quiz.published ? (
-                                                    <FaCheckCircle 
-                                                        className="text-success fs-5 cursor-pointer" 
-                                                        onClick={() => handleTogglePublish(quiz._id)}
-                                                        title="Published - Click to unpublish"
-                                                    />
-                                                ) : (
-                                                    <FaBan 
-                                                        className="text-danger fs-5 cursor-pointer" 
-                                                        onClick={() => handleTogglePublish(quiz._id)}
-                                                        title="Unpublished - Click to publish"
-                                                    />
-                                                )}
-                                            </div>
-                                        )}
+                                <div className="p-3 d-flex justify-content-between align-items-center border-start border-4 border-success">
+                                
+                                    <div className="d-flex align-items-center flex-grow-1">
+                                        <HiOutlineRocketLaunch color="green" className="me-2 fs-4 mt-1" />
 
                                         {/* Quiz Info */}
                                         <div className="flex-grow-1">
-                                            <Link 
+                                            <Link
                                                 href={`/Courses/${cid}/Quizzes/${quiz._id}`}
                                                 className="text-decoration-none text-dark"
                                             >
@@ -184,12 +167,12 @@ export default function Quizzes() {
                                                     )}
                                                     {" | "}{quiz.points} pts
                                                     {" | "}{quiz.questions?.length || 0} Questions
-                                                    
+
                                                     {/* Student Score */}
                                                     {!isFaculty && studentAttempt && (
                                                         <>
                                                             {" | "}
-                                                            <Badge 
+                                                            <Badge
                                                                 bg={getScoreColor(studentAttempt.score, quiz.points)}
                                                                 className="ms-1"
                                                             >
@@ -200,11 +183,29 @@ export default function Quizzes() {
                                                 </div>
                                             </Link>
                                         </div>
+                                        {/* Publish Status Icon (Faculty only) */}
+                                        {isFaculty && (
+                                            <div className="me-3">
+                                                {quiz.published ? (
+                                                    <FaCheckCircle
+                                                        className="text-success fs-5 cursor-pointer"
+                                                        onClick={() => handleTogglePublish(quiz._id)}
+                                                        title="Published - Click to unpublish"
+                                                    />
+                                                ) : (
+                                                    <FaBan
+                                                        className="text-danger fs-5 cursor-pointer"
+                                                        onClick={() => handleTogglePublish(quiz._id)}
+                                                        title="Unpublished - Click to publish"
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Context Menu (Faculty only) */}
                                     {isFaculty && (
-                                        <QuizContextMenu 
+                                        <QuizContextMenu
                                             quizId={quiz._id}
                                             onDelete={handleDeleteQuiz}
                                         />

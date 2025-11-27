@@ -124,14 +124,26 @@ export default function QuizAttempt() {
     if (loading) return <div className="text-center my-5"><h4>Loading...</h4></div>;
     if (!quiz) return <div className="text-center my-5"><h4>Quiz not found</h4></div>;
 
+    const maxAttempts = quiz.multipleAttempts ? quiz.howManyAttempts : 1;
+    const hasAttemptsLeft = attemptCount < maxAttempts;
+
     // Check if attempts exceeded
-    if (quiz.multipleAttempts && attemptCount >= quiz.howManyAttempts) {
+    if (!hasAttemptsLeft) {
         return (
             <div className="container mt-4">
                 <Alert variant="warning">
                     <h4>No More Attempts</h4>
-                    <p>You have used all {quiz.howManyAttempts} attempts for this quiz.</p>
-                    <Button variant="primary" onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}`)}>
+                    <p>
+                        You have used all {maxAttempts} attempt{maxAttempts > 1 ? 's' : ''} for this quiz.
+                    </p>
+                    <p className="mb-0">
+                        <strong>Your attempts:</strong> {attemptCount} / {maxAttempts}
+                    </p>
+                    <Button 
+                        variant="primary" 
+                        className="mt-3"
+                        onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}`)}
+                    >
                         View Quiz Details
                     </Button>
                 </Alert>
@@ -147,7 +159,7 @@ export default function QuizAttempt() {
                 <div className="d-flex justify-content-between align-items-center">
                     <div>
                         <strong>Attempt {attemptCount + 1}</strong>
-                        {quiz.multipleAttempts && ` of ${quiz.howManyAttempts}`}
+                        {" of "}{maxAttempts}
                     </div>
                     {timeLeft !== null && (
                         <Alert variant={timeLeft < 60 ? "danger" : "info"} className="mb-0 py-2">
