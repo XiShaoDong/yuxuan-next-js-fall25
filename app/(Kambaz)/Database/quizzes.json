@@ -1,0 +1,302 @@
+[
+    {
+      "_id": "quiz_001",
+      "course": "RS101",
+      "title": "Introduction to React Quiz",
+      "description": "Test your knowledge of React fundamentals",
+      "quizType": "GradedQuiz",
+      "points": 30,
+      "assignmentGroup": "Quizzes",
+      "shuffleAnswers": true,
+      "timeLimit": 20,
+      "multipleAttempts": true,
+      "howManyAttempts": 3,
+      "showCorrectAnswers": "After submission",
+      "accessCode": "",
+      "oneQuestionAtTime": true,
+      "webcamRequired": false,
+      "lockQuestionsAfterAnswering": false,
+      "dueDate": "2025-12-15T23:59:00.000Z",
+      "availableDate": "2025-11-20T00:00:00.000Z",
+      "untilDate": "2025-12-20T23:59:00.000Z",
+      "published": true,
+      "questions": [
+        {
+          "_id": "q001",
+          "type": "multipleChoice",
+          "title": "React Basics",
+          "points": 10,
+          "question": "<p>What is React?</p>",
+          "choices": [
+            {
+              "_id": "c001",
+              "text": "A JavaScript library for building user interfaces",
+              "isCorrect": true
+            },
+            {
+              "_id": "c002",
+              "text": "A programming language",
+              "isCorrect": false
+            },
+            {
+              "_id": "c003",
+              "text": "A CSS framework",
+              "isCorrect": false
+            },
+            {
+              "_id": "c004",
+              "text": "A database management system",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "_id": "q002",
+          "type": "trueFalse",
+          "title": "JSX Statement",
+          "points": 10,
+          "question": "<p>JSX stands for JavaScript XML and allows you to write HTML in React.</p>",
+          "correctAnswer": true
+        },
+        {
+          "_id": "q003",
+          "type": "fillInBlank",
+          "title": "React Hook",
+          "points": 10,
+          "question": "<p>The _____ hook allows you to add state to functional components.</p>",
+          "possibleAnswers": ["useState", "use state", "UseState"],
+          "caseSensitive": false
+        }
+      ]
+    },
+    {
+      "_id": "quiz_002",
+      "course": "RS101",
+      "title": "Midterm Exam - React Advanced Concepts",
+      "description": "Comprehensive exam covering hooks, context, and performance optimization",
+      "quizType": "GradedQuiz",
+      "points": 100,
+      "assignmentGroup": "Exams",
+      "shuffleAnswers": false,
+      "timeLimit": 60,
+      "multipleAttempts": false,
+      "howManyAttempts": 1,
+      "showCorrectAnswers": "Never",
+      "accessCode": "REACT2024",
+      "oneQuestionAtTime": true,
+      "webcamRequired": true,
+      "lockQuestionsAfterAnswering": true,
+      "dueDate": "2025-11-30T23:59:00.000Z",
+      "availableDate": "2025-11-28T00:00:00.000Z",
+      "untilDate": "2025-11-30T23:59:00.000Z",
+      "published": true,
+      "questions": [
+        {
+          "_id": "q004",
+          "type": "multipleChoice",
+          "title": "useEffect Dependencies",
+          "points": 25,
+          "question": "<p>What happens when you omit the dependency array in useEffect?</p>",
+          "choices": [
+            {
+              "_id": "c005",
+              "text": "The effect runs after every render",
+              "isCorrect": true
+            },
+            {
+              "_id": "c006",
+              "text": "The effect never runs",
+              "isCorrect": false
+            },
+            {
+              "_id": "c007",
+              "text": "The effect runs only once",
+              "isCorrect": false
+            },
+            {
+              "_id": "c008",
+              "text": "It causes a syntax error",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "_id": "q005",
+          "type": "trueFalse",
+          "title": "Virtual DOM",
+          "points": 25,
+          "question": "<p>React's Virtual DOM is slower than direct DOM manipulation.</p>",
+          "correctAnswer": false
+        },
+        {
+          "_id": "q006",
+          "type": "fillInBlank",
+          "title": "Context API",
+          "points": 25,
+          "question": "<p>To consume a context value, you use the _____ hook.</p>",
+          "possibleAnswers": ["useContext", "use context", "UseContext"],
+          "caseSensitive": false
+        },
+        {
+          "_id": "q007",
+          "type": "multipleChoice",
+          "title": "Performance Optimization",
+          "points": 25,
+          "question": "<p>Which React feature prevents unnecessary re-renders?</p>",
+          "choices": [
+            {
+              "_id": "c009",
+              "text": "React.memo",
+              "isCorrect": true
+            },
+            {
+              "_id": "c010",
+              "text": "React.lazy",
+              "isCorrect": false
+            },
+            {
+              "_id": "c011",
+              "text": "React.fragment",
+              "isCorrect": false
+            },
+            {
+              "_id": "c012",
+              "text": "React.strict",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": "quiz_003",
+      "course": "RS101",
+      "title": "Practice Quiz - Component Lifecycle",
+      "description": "Practice understanding React component lifecycle methods",
+      "quizType": "PracticeQuiz",
+      "points": 20,
+      "assignmentGroup": "Quizzes",
+      "shuffleAnswers": true,
+      "timeLimit": 15,
+      "multipleAttempts": true,
+      "howManyAttempts": 999,
+      "showCorrectAnswers": "Immediately",
+      "accessCode": "",
+      "oneQuestionAtTime": false,
+      "webcamRequired": false,
+      "lockQuestionsAfterAnswering": false,
+      "dueDate": "2025-12-31T23:59:00.000Z",
+      "availableDate": "2025-11-01T00:00:00.000Z",
+      "untilDate": "2025-12-31T23:59:00.000Z",
+      "published": false,
+      "questions": [
+        {
+          "_id": "q008",
+          "type": "multipleChoice",
+          "title": "Mounting Phase",
+          "points": 10,
+          "question": "<p>Which method is called first in the component lifecycle?</p>",
+          "choices": [
+            {
+              "_id": "c013",
+              "text": "constructor",
+              "isCorrect": true
+            },
+            {
+              "_id": "c014",
+              "text": "render",
+              "isCorrect": false
+            },
+            {
+              "_id": "c015",
+              "text": "componentDidMount",
+              "isCorrect": false
+            },
+            {
+              "_id": "c016",
+              "text": "componentWillMount",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "_id": "q009",
+          "type": "trueFalse",
+          "title": "Component Update",
+          "points": 10,
+          "question": "<p>componentDidUpdate is called after every render, including the initial render.</p>",
+          "correctAnswer": false
+        }
+      ]
+    },
+    {
+      "_id": "quiz_004",
+      "course": "RS102",
+      "title": "Node.js Fundamentals Quiz",
+      "description": "Test your understanding of Node.js core concepts",
+      "quizType": "GradedQuiz",
+      "points": 50,
+      "assignmentGroup": "Quizzes",
+      "shuffleAnswers": true,
+      "timeLimit": 30,
+      "multipleAttempts": false,
+      "howManyAttempts": 1,
+      "showCorrectAnswers": "After due date",
+      "accessCode": "",
+      "oneQuestionAtTime": true,
+      "webcamRequired": false,
+      "lockQuestionsAfterAnswering": false,
+      "dueDate": "2025-12-10T23:59:00.000Z",
+      "availableDate": "2025-11-25T00:00:00.000Z",
+      "untilDate": "2025-12-15T23:59:00.000Z",
+      "published": true,
+      "questions": [
+        {
+          "_id": "q010",
+          "type": "multipleChoice",
+          "title": "Event Loop",
+          "points": 15,
+          "question": "<p>What is the Node.js event loop?</p>",
+          "choices": [
+            {
+              "_id": "c017",
+              "text": "A mechanism that handles asynchronous callbacks",
+              "isCorrect": true
+            },
+            {
+              "_id": "c018",
+              "text": "A database connection pool",
+              "isCorrect": false
+            },
+            {
+              "_id": "c019",
+              "text": "A web server framework",
+              "isCorrect": false
+            },
+            {
+              "_id": "c020",
+              "text": "A package manager",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "_id": "q011",
+          "type": "fillInBlank",
+          "title": "Module System",
+          "points": 15,
+          "question": "<p>In Node.js, the _____ function is used to import modules.</p>",
+          "possibleAnswers": ["require", "Require", "REQUIRE"],
+          "caseSensitive": false
+        },
+        {
+          "_id": "q012",
+          "type": "trueFalse",
+          "title": "Blocking Operations",
+          "points": 20,
+          "question": "<p>Node.js is single-threaded and blocking operations can freeze the entire application.</p>",
+          "correctAnswer": true
+        }
+      ]
+    }
+  ]
