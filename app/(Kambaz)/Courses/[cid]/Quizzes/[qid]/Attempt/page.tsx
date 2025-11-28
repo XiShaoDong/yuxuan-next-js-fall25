@@ -1,16 +1,16 @@
 "use client"
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Button, Card, Form, Alert, ProgressBar } from "react-bootstrap";
-import * as client from "../../client";
-import * as attemptClient from "../client"; // Uses the attempt functions we added
+import { Button, Card, Form, Alert, ProgressBar, ButtonGroup } from "react-bootstrap";
+import * as client from "../client";
+import * as quizClient from "../../client";
 
 export default function QuizAttempt() {
     const { cid, qid } = useParams();
     const router = useRouter();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
-
+    
     const [quiz, setQuiz] = useState<any>(null);
     const [answers, setAnswers] = useState<any>({});
     const [loading, setLoading] = useState(true);
@@ -18,20 +18,41 @@ export default function QuizAttempt() {
     const [attemptCount, setAttemptCount] = useState(0);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [startTime] = useState(Date.now());
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [shuffledChoices, setShuffledChoices] = useState<{[key: string]: any[]}>({});
+
+    // Shuffle array function
+    const shuffleArray = (array: any[]) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    };
 
     useEffect(() => {
         const fetchQuizAndAttempts = async () => {
             try {
-                const quizData = await client.findQuizById(qid as string);
+                const quizData = await quizClient.findQuizById(qid as string);
                 setQuiz(quizData);
 
-                // Get previous attempts
-                const attempts = await attemptClient.getStudentAttempts(currentUser._id, qid as string);
+                // Shuffle choices if needed
+                if (quizData.shuffleAnswers) {
+                    const shuffled: {[key: string]: any[]} = {};
+                    quizData.questions.forEach((question: any) => {
+                        if (question.type === "multipleChoice" && question.choices) {
+                            shuffled[question._id] = shuffleArray(question.choices);
+                        }
+                    });
+                    setShuffledChoices(shuffled);
+                }
+
+                const attempts = await client.getStudentAttempts(currentUser._id, qid as string);
                 setAttemptCount(attempts.length);
 
-                // Set timer if time limit exists
                 if (quizData.timeLimit) {
-                    setTimeLeft(quizData.timeLimit * 60); // Convert to seconds
+                    setTimeLeft(quizData.timeLimit * 60);
                 }
             } catch (error) {
                 console.error("Error fetching quiz:", error);
@@ -45,14 +66,13 @@ export default function QuizAttempt() {
         }
     }, [qid, currentUser]);
 
-    // Timer countdown
     useEffect(() => {
         if (timeLeft === null || timeLeft <= 0) return;
 
         const timer = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev === null || prev <= 1) {
-                    handleSubmit(); // Auto-submit when time runs out
+                    handleSubmit();
                     return 0;
                 }
                 return prev - 1;
@@ -68,27 +88,21 @@ export default function QuizAttempt() {
 
     const handleSubmit = async () => {
         if (!quiz || !currentUser) return;
-
         setSubmitting(true);
 
         try {
-            // Calculate time spent
             const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-
-            // Prepare answers
             const formattedAnswers = quiz.questions.map((q: any) => ({
                 question: q._id,
                 answer: answers[q._id] ?? null
             }));
 
-            // Submit attempt
-            const attempt = await attemptClient.submitQuizAttempt(qid as string, {
+            const attempt = await client.submitQuizAttempt(qid as string, {
                 studentId: currentUser._id,
                 answers: formattedAnswers,
                 timeSpent
             });
 
-            // Navigate to results
             router.push(`/Courses/${cid}/Quizzes/${qid}/Results/${attempt._id}`);
         } catch (error) {
             console.error("Error submitting quiz:", error);
@@ -98,28 +112,47 @@ export default function QuizAttempt() {
         }
     };
 
+    const isAnswered = (questionId: string) => {
+        const answer = answers[questionId];
+        if (typeof answer === 'boolean') return true;
+        return answer !== undefined && answer !== null && answer !== "";
+    };
+
+    const answeredCount = useMemo(() => {
+        if (!quiz?.questions) return 0;
+        return quiz.questions.filter((q: any) => isAnswered(q._id)).length;
+    }, [quiz?.questions, answers]);
+
+    const totalQuestions = quiz?.questions?.length || 0;
+
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const isAnswered = (questionId: string) => {
-        const answer = answers[questionId];
-
-        if (typeof answer === 'boolean') {
-            return true;
-        }
-        
-        if (typeof answer === 'string') {
-            return answer.trim() !== "";
-        }
-
-        return answer !== undefined && answer !== null;
+    const goToQuestion = (index: number) => {
+        setCurrentQuestionIndex(index);
     };
 
-    const answeredCount = quiz?.questions?.filter((q: any) => isAnswered(q._id)).length || 0;
-    const totalQuestions = quiz?.questions?.length || 0;
+    const goToPrevious = () => {
+        if (currentQuestionIndex > 0) {
+            setCurrentQuestionIndex(currentQuestionIndex - 1);
+        }
+    };
+
+    const goToNext = () => {
+        if (currentQuestionIndex < totalQuestions - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+        }
+    };
+
+    const getChoicesForQuestion = (question: any) => {
+        if (quiz.shuffleAnswers && shuffledChoices[question._id]) {
+            return shuffledChoices[question._id];
+        }
+        return question.choices || [];
+    };
 
     if (loading) return <div className="text-center my-5"><h4>Loading...</h4></div>;
     if (!quiz) return <div className="text-center my-5"><h4>Quiz not found</h4></div>;
@@ -127,29 +160,21 @@ export default function QuizAttempt() {
     const maxAttempts = quiz.multipleAttempts ? quiz.howManyAttempts : 1;
     const hasAttemptsLeft = attemptCount < maxAttempts;
 
-    // Check if attempts exceeded
     if (!hasAttemptsLeft) {
         return (
             <div className="container mt-4">
                 <Alert variant="warning">
                     <h4>No More Attempts</h4>
-                    <p>
-                        You have used all {maxAttempts} attempt{maxAttempts > 1 ? 's' : ''} for this quiz.
-                    </p>
-                    <p className="mb-0">
-                        <strong>Your attempts:</strong> {attemptCount} / {maxAttempts}
-                    </p>
-                    <Button 
-                        variant="primary" 
-                        className="mt-3"
-                        onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}`)}
-                    >
+                    <p>You have used all {maxAttempts} attempt{maxAttempts > 1 ? 's' : ''} for this quiz.</p>
+                    <Button variant="primary" onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}`)}>
                         View Quiz Details
                     </Button>
                 </Alert>
             </div>
         );
     }
+
+    const currentQuestion = quiz.questions?.[currentQuestionIndex];
 
     return (
         <div className="container mt-4">
@@ -159,7 +184,7 @@ export default function QuizAttempt() {
                 <div className="d-flex justify-content-between align-items-center">
                     <div>
                         <strong>Attempt {attemptCount + 1}</strong>
-                        {" of "}{maxAttempts}
+                        {quiz.multipleAttempts && ` of ${quiz.howManyAttempts}`}
                     </div>
                     {timeLeft !== null && (
                         <Alert variant={timeLeft < 60 ? "danger" : "info"} className="mb-0 py-2">
@@ -173,92 +198,189 @@ export default function QuizAttempt() {
             <div className="mb-4">
                 <div className="d-flex justify-content-between mb-2">
                     <span>Progress: {answeredCount} / {totalQuestions}</span>
-                    <span>{Math.round((answeredCount / totalQuestions) * 100)}%</span>
+                    <span>{totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0}%</span>
                 </div>
-                <ProgressBar
-                    now={(answeredCount / totalQuestions) * 100}
+                <ProgressBar 
+                    now={totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0}
                     variant={answeredCount === totalQuestions ? "success" : "primary"}
                 />
             </div>
 
-            {/* Access Code Check */}
-            {quiz.accessCode && (
-                <Alert variant="info">
-                    This quiz requires an access code. Please make sure you have entered it correctly.
-                </Alert>
+            {/* Question Navigation */}
+            {quiz.oneQuestionAtTime && (
+                <div className="mb-4">
+                    <div className="d-flex flex-wrap gap-2">
+                        {quiz.questions.map((q: any, idx: number) => (
+                            <Button
+                                key={q._id}
+                                variant={idx === currentQuestionIndex ? "primary" : isAnswered(q._id) ? "success" : "outline-secondary"}
+                                size="sm"
+                                onClick={() => goToQuestion(idx)}
+                                style={{ minWidth: "45px" }}
+                            >
+                                {idx + 1}
+                                {isAnswered(q._id) && idx !== currentQuestionIndex && " ✓"}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
             )}
 
-            {/* Questions */}
-            {quiz.questions?.map((question: any, index: number) => (
-                <Card key={question._id} className="mb-4">
-                    <Card.Header className={isAnswered(question._id) ? "bg-success-subtle" : ""}>
-                        <strong>Question {index + 1}</strong> ({question.points} pts)
-                        {isAnswered(question._id) && <span className="badge bg-success ms-2">Answered</span>}
-                    </Card.Header>
-                    <Card.Body>
-                        {/* Question Text */}
-                        <div
-                            className="mb-3"
-                            dangerouslySetInnerHTML={{ __html: question.question }}
-                        />
+            {/* Questions Display */}
+            {quiz.oneQuestionAtTime ? (
+                // One Question at a Time Mode
+                currentQuestion && (
+                    <Card className="mb-4">
+                        <Card.Header className={isAnswered(currentQuestion._id) ? "bg-success-subtle" : ""}>
+                            <div className="d-flex justify-content-between">
+                                <div>
+                                    <strong>Question {currentQuestionIndex + 1} of {totalQuestions}</strong>
+                                    <span className="mx-2">|</span>
+                                    <span>{currentQuestion.points} pts</span>
+                                </div>
+                                {isAnswered(currentQuestion._id) && (
+                                    <span className="badge bg-success">Answered</span>
+                                )}
+                            </div>
+                        </Card.Header>
+                        <Card.Body>
+                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
 
-                        {/* Multiple Choice */}
-                        {question.type === "multipleChoice" && (
-                            <div>
-                                {question.choices.map((choice: any) => (
+                            {/* Multiple Choice */}
+                            {currentQuestion.type === "multipleChoice" && (
+                                <div>
+                                    {getChoicesForQuestion(currentQuestion).map((choice: any) => (
+                                        <Form.Check
+                                            key={choice._id}
+                                            type="radio"
+                                            name={`question-${currentQuestion._id}`}
+                                            label={choice.text}
+                                            value={choice._id}
+                                            checked={answers[currentQuestion._id] === choice._id}
+                                            onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* True/False */}
+                            {currentQuestion.type === "trueFalse" && (
+                                <div>
                                     <Form.Check
-                                        key={choice._id}
+                                        type="radio"
+                                        name={`question-${currentQuestion._id}`}
+                                        label="True"
+                                        checked={answers[currentQuestion._id] === true}
+                                        onChange={() => handleAnswerChange(currentQuestion._id, true)}
+                                    />
+                                    <Form.Check
+                                        type="radio"
+                                        name={`question-${currentQuestion._id}`}
+                                        label="False"
+                                        checked={answers[currentQuestion._id] === false}
+                                        onChange={() => handleAnswerChange(currentQuestion._id, false)}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Fill in Blank */}
+                            {currentQuestion.type === "fillInBlank" && (
+                                <Form.Control
+                                    type="text"
+                                    value={answers[currentQuestion._id] || ""}
+                                    onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
+                                    placeholder="Type your answer here"
+                                />
+                            )}
+                        </Card.Body>
+                    </Card>
+                )
+            ) : (
+                // All Questions Mode
+                quiz.questions?.map((question: any, index: number) => (
+                    <Card key={question._id} className="mb-4">
+                        <Card.Header className={isAnswered(question._id) ? "bg-success-subtle" : ""}>
+                            <strong>Question {index + 1}</strong> ({question.points} pts)
+                            {isAnswered(question._id) && <span className="badge bg-success ms-2">Answered</span>}
+                        </Card.Header>
+                        <Card.Body>
+                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
+
+                            {question.type === "multipleChoice" && (
+                                <div>
+                                    {getChoicesForQuestion(question).map((choice: any) => (
+                                        <Form.Check
+                                            key={choice._id}
+                                            type="radio"
+                                            name={`question-${question._id}`}
+                                            label={choice.text}
+                                            value={choice._id}
+                                            checked={answers[question._id] === choice._id}
+                                            onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            {question.type === "trueFalse" && (
+                                <div>
+                                    <Form.Check
                                         type="radio"
                                         name={`question-${question._id}`}
-                                        label={choice.text}
-                                        value={choice._id}
-                                        checked={answers[question._id] === choice._id}
-                                        onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                                        label="True"
+                                        checked={answers[question._id] === true}
+                                        onChange={() => handleAnswerChange(question._id, true)}
                                     />
-                                ))}
-                            </div>
-                        )}
+                                    <Form.Check
+                                        type="radio"
+                                        name={`question-${question._id}`}
+                                        label="False"
+                                        checked={answers[question._id] === false}
+                                        onChange={() => handleAnswerChange(question._id, false)}
+                                    />
+                                </div>
+                            )}
 
-                        {/* True/False */}
-                        {question.type === "trueFalse" && (
-                            <div>
-                                <Form.Check
-                                    type="radio"
-                                    name={`question-${question._id}`}
-                                    label="True"
-                                    checked={answers[question._id] === true}
-                                    onChange={() => handleAnswerChange(question._id, true)}
+                            {question.type === "fillInBlank" && (
+                                <Form.Control
+                                    type="text"
+                                    value={answers[question._id] || ""}
+                                    onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                                    placeholder="Type your answer here"
                                 />
-                                <Form.Check
-                                    type="radio"
-                                    name={`question-${question._id}`}
-                                    label="False"
-                                    checked={answers[question._id] === false}
-                                    onChange={() => handleAnswerChange(question._id, false)}
-                                />
-                            </div>
-                        )}
+                            )}
+                        </Card.Body>
+                    </Card>
+                ))
+            )}
 
-                        {/* Fill in Blank */}
-                        {question.type === "fillInBlank" && (
-                            <Form.Control
-                                type="text"
-                                value={answers[question._id] || ""}
-                                onChange={(e) => handleAnswerChange(question._id, e.target.value)}
-                                placeholder="Type your answer here"
-                            />
-                        )}
-                    </Card.Body>
-                </Card>
-            ))}
+            {/* Navigation Buttons (One Question at a Time) */}
+            {quiz.oneQuestionAtTime && (
+                <div className="d-flex justify-content-between mb-4">
+                    <Button 
+                        variant="secondary" 
+                        onClick={goToPrevious}
+                        disabled={currentQuestionIndex === 0}
+                    >
+                        Previous
+                    </Button>
+                    <Button 
+                        variant="secondary" 
+                        onClick={goToNext}
+                        disabled={currentQuestionIndex === totalQuestions - 1}
+                    >
+                        Next
+                    </Button>
+                </div>
+            )}
 
             {/* Submit Button */}
             <div className="text-center mb-5">
-                <Button
-                    variant="danger"
-                    size="lg"
+                <Button 
+                    variant="danger" 
+                    size="lg" 
                     onClick={handleSubmit}
-                    disabled={submitting || answeredCount === 0}
+                    disabled={submitting}
                 >
                     {submitting ? "Submitting..." : "Submit Quiz"}
                 </Button>
