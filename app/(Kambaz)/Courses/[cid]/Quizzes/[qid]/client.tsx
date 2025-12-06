@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// 添加到现有的 client.tsx 文件末尾
 const axiosWithCredentials = axios.create({ withCredentials: true });
 export const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 const ATTEMPTS_API = `${HTTP_SERVER}/api/attempts`;

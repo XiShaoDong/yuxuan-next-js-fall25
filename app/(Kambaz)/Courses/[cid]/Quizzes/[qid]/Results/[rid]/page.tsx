@@ -42,7 +42,25 @@ export default function QuizResults() {
         } else if (question.type === "trueFalse") {
             return answer.answer === true ? "True" : answer.answer === false ? "False" : "No answer";
         } else if (question.type === "fillInBlank") {
-            return answer.answer || "No answer";
+            // Handle multiple blanks
+            if (question.blanks && question.blanks.length > 0) {
+                if (typeof answer.answer === 'object' && answer.answer !== null) {
+                    return (
+                        <div>
+                            {question.blanks.map((blank: any) => (
+                                <div key={blank.id} className="mb-1">
+                                    <span className="badge bg-warning text-dark me-2">[{blank.id}]</span>
+                                    <span>{answer.answer[blank.id] || "(empty)"}</span>
+                                </div>
+                            ))}
+                        </div>
+                    );
+                }
+                return "No answer";
+            } else {
+                // Old structure (backward compatibility)
+                return answer.answer || "No answer";
+            }
         }
         return "Unknown";
     };
@@ -54,7 +72,25 @@ export default function QuizResults() {
         } else if (question.type === "trueFalse") {
             return question.correctAnswer ? "True" : "False";
         } else if (question.type === "fillInBlank") {
-            return question.possibleAnswers.join(", ");
+            // Handle multiple blanks
+            if (question.blanks && question.blanks.length > 0) {
+                return (
+                    <div>
+                        {question.blanks.map((blank: any) => (
+                            <div key={blank.id} className="mb-1">
+                                <span className="badge bg-success text-white me-2">[{blank.id}]</span>
+                                <span>{blank.possibleAnswers.join(", ")}</span>
+                                {blank.caseSensitive && (
+                                    <small className="text-muted ms-2">(case sensitive)</small>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                );
+            } else {
+                // Old structure (backward compatibility)
+                return question.possibleAnswers.join(", ");
+            }
         }
         return "Unknown";
     };
@@ -149,7 +185,8 @@ export default function QuizResults() {
                             {/* Correct Answer (if wrong) */}
                             {!answer.isCorrect && (
                                 <div className="text-success">
-                                    <strong>Correct Answer:</strong> {getCorrectAnswerDisplay(question)}
+                                    <strong>Correct Answer:</strong>
+                                    <div className="mt-1">{getCorrectAnswerDisplay(question)}</div>
                                 </div>
                             )}
                         </Card.Body>

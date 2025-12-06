@@ -2,17 +2,23 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Dropdown } from "react-bootstrap";
-import { FaEllipsisV, FaEdit, FaTrash, FaCopy } from "react-icons/fa";
+import { FaEllipsisV, FaEdit, FaTrash, FaCopy, FaCheckCircle, FaBan } from "react-icons/fa";
 
 interface QuizContextMenuProps {
     quizId: string;
+    published: boolean;  // ← 添加 published 属性
     onDelete: (quizId: string) => void;
+    onTogglePublish: (quizId: string) => void;  // ← 添加 toggle 函数
 }
 
-export default function QuizContextMenu({ quizId, onDelete }: QuizContextMenuProps) {
+export default function QuizContextMenu({ 
+    quizId, 
+    published, 
+    onDelete, 
+    onTogglePublish 
+}: QuizContextMenuProps) {
     const { cid } = useParams();
     const router = useRouter();
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const handleEdit = () => {
         router.push(`/Courses/${cid}/Quizzes/${quizId}/Editor`);
@@ -25,8 +31,12 @@ export default function QuizContextMenu({ quizId, onDelete }: QuizContextMenuPro
     };
 
     const handleCopy = () => {
-        // TODO optional: Implement copy functionality 
         alert("Copy functionality coming soon!");
+    };
+
+    // ✅ 添加 toggle publish 处理
+    const handleTogglePublish = () => {
+        onTogglePublish(quizId);
     };
 
     return (
@@ -47,6 +57,20 @@ export default function QuizContextMenu({ quizId, onDelete }: QuizContextMenuPro
                 <Dropdown.Item onClick={handleDelete} className="text-danger">
                     <FaTrash className="me-2" />
                     Delete
+                </Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={handleTogglePublish}>
+                    {published ? (
+                        <>
+                            <FaBan className="me-2" />
+                            Unpublish
+                        </>
+                    ) : (
+                        <>
+                            <FaCheckCircle className="me-2" />
+                            Publish
+                        </>
+                    )}
                 </Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={handleCopy}>

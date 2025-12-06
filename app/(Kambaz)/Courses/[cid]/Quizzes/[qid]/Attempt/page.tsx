@@ -10,7 +10,7 @@ export default function QuizAttempt() {
     const { cid, qid } = useParams();
     const router = useRouter();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
-    
+
     const [quiz, setQuiz] = useState<any>(null);
     const [answers, setAnswers] = useState<any>({});
     const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ export default function QuizAttempt() {
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [startTime] = useState(Date.now());
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [shuffledChoices, setShuffledChoices] = useState<{[key: string]: any[]}>({});
+    const [shuffledChoices, setShuffledChoices] = useState<{ [key: string]: any[] }>({});
 
     // Shuffle array function
     const shuffleArray = (array: any[]) => {
@@ -39,7 +39,7 @@ export default function QuizAttempt() {
 
                 // Shuffle choices if needed
                 if (quizData.shuffleAnswers) {
-                    const shuffled: {[key: string]: any[]} = {};
+                    const shuffled: { [key: string]: any[] } = {};
                     quizData.questions.forEach((question: any) => {
                         if (question.type === "multipleChoice" && question.choices) {
                             shuffled[question._id] = shuffleArray(question.choices);
@@ -54,6 +54,20 @@ export default function QuizAttempt() {
                 if (quizData.timeLimit) {
                     setTimeLeft(quizData.timeLimit * 60);
                 }
+
+                // Initialize fillInBlank answers with blank structure
+                const initialAnswers: any = {};
+                quizData.questions.forEach((question: any) => {
+                    if (question.type === "fillInBlank" && question.blanks) {
+                        // Initialize with empty object for each blank
+                        initialAnswers[question._id] = {};
+                        question.blanks.forEach((blank: any) => {
+                            initialAnswers[question._id][blank.id] = "";
+                        });
+                    }
+                });
+                setAnswers(initialAnswers);
+
             } catch (error) {
                 console.error("Error fetching quiz:", error);
             } finally {
@@ -86,6 +100,17 @@ export default function QuizAttempt() {
         setAnswers({ ...answers, [questionId]: answer });
     };
 
+    // NEW: Handle fillInBlank with multiple blanks
+    const handleBlankAnswerChange = (questionId: string, blankId: string, value: string) => {
+        setAnswers({
+            ...answers,
+            [questionId]: {
+                ...(answers[questionId] || {}),
+                [blankId]: value
+            }
+        });
+    };
+
     const handleSubmit = async () => {
         if (!quiz || !currentUser) return;
         setSubmitting(true);
@@ -115,6 +140,13 @@ export default function QuizAttempt() {
     const isAnswered = (questionId: string) => {
         const answer = answers[questionId];
         if (typeof answer === 'boolean') return true;
+
+        // For fillInBlank with multiple blanks
+        if (typeof answer === 'object' && answer !== null && !Array.isArray(answer)) {
+            // Check if at least one blank is filled
+            return Object.values(answer).some((val: any) => val && val.trim() !== "");
+        }
+
         return answer !== undefined && answer !== null && answer !== "";
     };
 
@@ -152,6 +184,68 @@ export default function QuizAttempt() {
             return shuffledChoices[question._id];
         }
         return question.choices || [];
+    };
+
+
+    const renderQuestionWithBlanks = (question: any) => {
+        if (!question.blanks || question.blanks.length === 0) {
+            return <div dangerouslySetInnerHTML={{ __html: question.question }} />;
+        }
+
+        // Parse the question HTML and split by blanks
+        let parts: any[] = [];
+        let remainingHtml = question.question;
+
+        question.blanks.forEach((blank: any, index: number) => {
+            const regex = new RegExp(`\\[${blank.id}\\]`);
+            const match = remainingHtml.match(regex);
+
+            if (match) {
+                const splitIndex = match.index!;
+                // Add the text before the blank
+                parts.push({
+                    type: 'html',
+                    content: remainingHtml.substring(0, splitIndex)
+                });
+                // Add the input for the blank
+                parts.push({
+                    type: 'input',
+                    blankId: blank.id
+                });
+                // Continue with remaining text
+                remainingHtml = remainingHtml.substring(splitIndex + match[0].length);
+            }
+        });
+
+        // Add any remaining HTML
+        if (remainingHtml) {
+            parts.push({
+                type: 'html',
+                content: remainingHtml
+            });
+        }
+
+        return (
+            <div>
+                {parts.map((part, index) => {
+                    if (part.type === 'html') {
+                        return <span key={index} dangerouslySetInnerHTML={{ __html: part.content }} />;
+                    } else {
+                        return (
+                            <input
+                                key={index}
+                                type="text"
+                                className="form-control d-inline-block mx-1"
+                                style={{ width: "150px" }}
+                                value={answers[question._id]?.[part.blankId] || ""}
+                                onChange={(e) => handleBlankAnswerChange(question._id, part.blankId, e.target.value)}
+                                placeholder="Type answer"
+                            />
+                        );
+                    }
+                })}
+            </div>
+        );
     };
 
     if (loading) return <div className="text-center my-5"><h4>Loading...</h4></div>;
@@ -200,7 +294,7 @@ export default function QuizAttempt() {
                     <span>Progress: {answeredCount} / {totalQuestions}</span>
                     <span>{totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0}%</span>
                 </div>
-                <ProgressBar 
+                <ProgressBar
                     now={totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0}
                     variant={answeredCount === totalQuestions ? "success" : "primary"}
                 />
@@ -244,53 +338,66 @@ export default function QuizAttempt() {
                             </div>
                         </Card.Header>
                         <Card.Body>
-                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
-
                             {/* Multiple Choice */}
                             {currentQuestion.type === "multipleChoice" && (
-                                <div>
-                                    {getChoicesForQuestion(currentQuestion).map((choice: any) => (
-                                        <Form.Check
-                                            key={choice._id}
-                                            type="radio"
-                                            name={`question-${currentQuestion._id}`}
-                                            label={choice.text}
-                                            value={choice._id}
-                                            checked={answers[currentQuestion._id] === choice._id}
-                                            onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
-                                        />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
+                                    <div>
+                                        {getChoicesForQuestion(currentQuestion).map((choice: any) => (
+                                            <Form.Check
+                                                key={choice._id}
+                                                type="radio"
+                                                name={`question-${currentQuestion._id}`}
+                                                label={choice.text}
+                                                value={choice._id}
+                                                checked={answers[currentQuestion._id] === choice._id}
+                                                onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
                             )}
 
                             {/* True/False */}
                             {currentQuestion.type === "trueFalse" && (
-                                <div>
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${currentQuestion._id}`}
-                                        label="True"
-                                        checked={answers[currentQuestion._id] === true}
-                                        onChange={() => handleAnswerChange(currentQuestion._id, true)}
-                                    />
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${currentQuestion._id}`}
-                                        label="False"
-                                        checked={answers[currentQuestion._id] === false}
-                                        onChange={() => handleAnswerChange(currentQuestion._id, false)}
-                                    />
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
+                                    <div>
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${currentQuestion._id}`}
+                                            label="True"
+                                            checked={answers[currentQuestion._id] === true}
+                                            onChange={() => handleAnswerChange(currentQuestion._id, true)}
+                                        />
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${currentQuestion._id}`}
+                                            label="False"
+                                            checked={answers[currentQuestion._id] === false}
+                                            onChange={() => handleAnswerChange(currentQuestion._id, false)}
+                                        />
+                                    </div>
+                                </>
                             )}
 
-                            {/* Fill in Blank */}
+                            {/* Fill in Blank - NEW: Support multiple blanks */}
                             {currentQuestion.type === "fillInBlank" && (
-                                <Form.Control
-                                    type="text"
-                                    value={answers[currentQuestion._id] || ""}
-                                    onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
-                                    placeholder="Type your answer here"
-                                />
+                                <div>
+                                    {currentQuestion.blanks && currentQuestion.blanks.length > 0 ? (
+                                        renderQuestionWithBlanks(currentQuestion)
+                                    ) : (
+                                        <>
+                                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
+                                            <Form.Control
+                                                type="text"
+                                                value={answers[currentQuestion._id] || ""}
+                                                onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
+                                                placeholder="Type your answer here"
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             )}
                         </Card.Body>
                     </Card>
@@ -304,50 +411,63 @@ export default function QuizAttempt() {
                             {isAnswered(question._id) && <span className="badge bg-success ms-2">Answered</span>}
                         </Card.Header>
                         <Card.Body>
-                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
-
                             {question.type === "multipleChoice" && (
-                                <div>
-                                    {getChoicesForQuestion(question).map((choice: any) => (
-                                        <Form.Check
-                                            key={choice._id}
-                                            type="radio"
-                                            name={`question-${question._id}`}
-                                            label={choice.text}
-                                            value={choice._id}
-                                            checked={answers[question._id] === choice._id}
-                                            onChange={(e) => handleAnswerChange(question._id, e.target.value)}
-                                        />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
+                                    <div>
+                                        {getChoicesForQuestion(question).map((choice: any) => (
+                                            <Form.Check
+                                                key={choice._id}
+                                                type="radio"
+                                                name={`question-${question._id}`}
+                                                label={choice.text}
+                                                value={choice._id}
+                                                checked={answers[question._id] === choice._id}
+                                                onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
                             )}
 
                             {question.type === "trueFalse" && (
-                                <div>
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${question._id}`}
-                                        label="True"
-                                        checked={answers[question._id] === true}
-                                        onChange={() => handleAnswerChange(question._id, true)}
-                                    />
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${question._id}`}
-                                        label="False"
-                                        checked={answers[question._id] === false}
-                                        onChange={() => handleAnswerChange(question._id, false)}
-                                    />
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
+                                    <div>
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${question._id}`}
+                                            label="True"
+                                            checked={answers[question._id] === true}
+                                            onChange={() => handleAnswerChange(question._id, true)}
+                                        />
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${question._id}`}
+                                            label="False"
+                                            checked={answers[question._id] === false}
+                                            onChange={() => handleAnswerChange(question._id, false)}
+                                        />
+                                    </div>
+                                </>
                             )}
 
                             {question.type === "fillInBlank" && (
-                                <Form.Control
-                                    type="text"
-                                    value={answers[question._id] || ""}
-                                    onChange={(e) => handleAnswerChange(question._id, e.target.value)}
-                                    placeholder="Type your answer here"
-                                />
+                                <div>
+                                    {question.blanks && question.blanks.length > 0 ? (
+                                        renderQuestionWithBlanks(question)
+                                    ) : (
+                                        <>
+                                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
+                                            <Form.Control
+                                                type="text"
+                                                value={answers[question._id] || ""}
+                                                onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                                                placeholder="Type your answer here"
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             )}
                         </Card.Body>
                     </Card>
@@ -357,15 +477,15 @@ export default function QuizAttempt() {
             {/* Navigation Buttons (One Question at a Time) */}
             {quiz.oneQuestionAtTime && (
                 <div className="d-flex justify-content-between mb-4">
-                    <Button 
-                        variant="secondary" 
+                    <Button
+                        variant="secondary"
                         onClick={goToPrevious}
                         disabled={currentQuestionIndex === 0}
                     >
                         Previous
                     </Button>
-                    <Button 
-                        variant="secondary" 
+                    <Button
+                        variant="secondary"
                         onClick={goToNext}
                         disabled={currentQuestionIndex === totalQuestions - 1}
                     >
@@ -376,9 +496,9 @@ export default function QuizAttempt() {
 
             {/* Submit Button */}
             <div className="text-center mb-5">
-                <Button 
-                    variant="danger" 
-                    size="lg" 
+                <Button
+                    variant="danger"
+                    size="lg"
                     onClick={handleSubmit}
                     disabled={submitting}
                 >

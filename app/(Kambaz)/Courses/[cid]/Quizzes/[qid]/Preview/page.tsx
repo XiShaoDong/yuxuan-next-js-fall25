@@ -40,6 +40,19 @@ export default function QuizPreview() {
                     });
                     setShuffledChoices(shuffled);
                 }
+
+                // Initialize fillInBlank answers
+                const initialAnswers: any = {};
+                data.questions.forEach((question: any) => {
+                    if (question.type === "fillInBlank" && question.blanks) {
+                        initialAnswers[question._id] = {};
+                        question.blanks.forEach((blank: any) => {
+                            initialAnswers[question._id][blank.id] = "";
+                        });
+                    }
+                });
+                setAnswers(initialAnswers);
+
             } catch (error) {
                 console.error("Error fetching quiz:", error);
             } finally {
@@ -51,6 +64,16 @@ export default function QuizPreview() {
 
     const handleAnswerChange = (questionId: string, answer: any) => {
         setAnswers({ ...answers, [questionId]: answer });
+    };
+
+    const handleBlankAnswerChange = (questionId: string, blankId: string, value: string) => {
+        setAnswers({
+            ...answers,
+            [questionId]: {
+                ...(answers[questionId] || {}),
+                [blankId]: value
+            }
+        });
     };
 
     const handleSubmit = () => {
@@ -67,11 +90,24 @@ export default function QuizPreview() {
             } else if (question.type === "trueFalse") {
                 isCorrect = studentAnswer === question.correctAnswer;
             } else if (question.type === "fillInBlank") {
-                const answer = question.caseSensitive ? studentAnswer : studentAnswer?.toLowerCase();
-                const possibleAnswers = question.caseSensitive
-                    ? question.possibleAnswers
-                    : question.possibleAnswers.map((a: string) => a.toLowerCase());
-                isCorrect = possibleAnswers.includes(answer);
+                // Handle multiple blanks
+                if (question.blanks && question.blanks.length > 0) {
+                    isCorrect = question.blanks.every((blank: any) => {
+                        const userAnswer = studentAnswer?.[blank.id] || "";
+                        const answer = blank.caseSensitive ? userAnswer : userAnswer.toLowerCase();
+                        const possibleAnswers = blank.caseSensitive
+                            ? blank.possibleAnswers
+                            : blank.possibleAnswers.map((a: string) => a.toLowerCase());
+                        return possibleAnswers.includes(answer);
+                    });
+                } else {
+                    // Old structure (backward compatibility)
+                    const answer = question.caseSensitive ? studentAnswer : studentAnswer?.toLowerCase();
+                    const possibleAnswers = question.caseSensitive
+                        ? question.possibleAnswers
+                        : question.possibleAnswers.map((a: string) => a.toLowerCase());
+                    isCorrect = possibleAnswers.includes(answer);
+                }
             }
 
             if (isCorrect) {
@@ -93,11 +129,24 @@ export default function QuizPreview() {
         } else if (question.type === "trueFalse") {
             isCorrect = studentAnswer === question.correctAnswer;
         } else if (question.type === "fillInBlank") {
-            const answer = question.caseSensitive ? studentAnswer : studentAnswer?.toLowerCase();
-            const possibleAnswers = question.caseSensitive
-                ? question.possibleAnswers
-                : question.possibleAnswers.map((a: string) => a.toLowerCase());
-            isCorrect = possibleAnswers.includes(answer);
+            // Handle multiple blanks
+            if (question.blanks && question.blanks.length > 0) {
+                isCorrect = question.blanks.every((blank: any) => {
+                    const userAnswer = studentAnswer?.[blank.id] || "";
+                    const answer = blank.caseSensitive ? userAnswer : userAnswer.toLowerCase();
+                    const possibleAnswers = blank.caseSensitive
+                        ? blank.possibleAnswers
+                        : blank.possibleAnswers.map((a: string) => a.toLowerCase());
+                    return possibleAnswers.includes(answer);
+                });
+            } else {
+                // Old structure
+                const answer = question.caseSensitive ? studentAnswer : studentAnswer?.toLowerCase();
+                const possibleAnswers = question.caseSensitive
+                    ? question.possibleAnswers
+                    : question.possibleAnswers.map((a: string) => a.toLowerCase());
+                isCorrect = possibleAnswers.includes(answer);
+            }
         }
 
         return isCorrect;
@@ -129,7 +178,52 @@ export default function QuizPreview() {
     const isAnswered = (questionId: string) => {
         const answer = answers[questionId];
         if (typeof answer === 'boolean') return true;
+        
+        // For fillInBlank with multiple blanks
+        if (typeof answer === 'object' && answer !== null && !Array.isArray(answer)) {
+            return Object.values(answer).some((val: any) => val && val.trim() !== "");
+        }
+        
         return answer !== undefined && answer !== null && answer !== "";
+    };
+
+    const renderQuestionWithBlanks = (question: any, disabled: boolean = false) => {
+        if (!question.blanks || question.blanks.length === 0) {
+            return <div dangerouslySetInnerHTML={{ __html: question.question }} />;
+        }
+
+        let questionHtml = question.question;
+        
+        question.blanks.forEach((blank: any) => {
+            const blankRegex = new RegExp(`\\[${blank.id}\\]`, 'g');
+            const inputHtml = `<input 
+                type="text" 
+                class="blank-input form-control d-inline-block mx-1" 
+                style="width: 150px; display: inline-block !important;" 
+                data-blank-id="${blank.id}"
+                value="${answers[question._id]?.[blank.id] || ''}"
+                placeholder="Answer"
+                ${disabled ? 'disabled' : ''}
+            />`;
+            questionHtml = questionHtml.replace(blankRegex, inputHtml);
+        });
+
+        return (
+            <div 
+                dangerouslySetInnerHTML={{ __html: questionHtml }}
+                onChange={(e) => {
+                    if (disabled) return;
+                    const target = e.target as HTMLElement;
+                    if (target.classList.contains('blank-input')) {
+                        const input = target as HTMLInputElement;
+                        const blankId = input.getAttribute('data-blank-id');
+                        if (blankId) {
+                            handleBlankAnswerChange(question._id, blankId, input.value);
+                        }
+                    }
+                }}
+            />
+        );
     };
 
     if (loading) return <div className="text-center my-5"><h4>Loading...</h4></div>;
@@ -194,62 +288,93 @@ export default function QuizPreview() {
                             <strong>Question {currentQuestionIndex + 1} of {totalQuestions}</strong> ({currentQuestion.points} pts)
                         </Card.Header>
                         <Card.Body>
-                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
-
                             {currentQuestion.type === "multipleChoice" && (
-                                <div>
-                                    {getChoicesForQuestion(currentQuestion).map((choice: any) => (
-                                        <Form.Check
-                                            key={choice._id}
-                                            type="radio"
-                                            name={`question-${currentQuestion._id}`}
-                                            label={choice.text}
-                                            value={choice._id}
-                                            checked={answers[currentQuestion._id] === choice._id}
-                                            onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
-                                            disabled={showResults}
-                                            className={showResults && choice.isCorrect ? 'text-success fw-bold' : ''}
-                                        />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
+                                    <div>
+                                        {getChoicesForQuestion(currentQuestion).map((choice: any) => (
+                                            <Form.Check
+                                                key={choice._id}
+                                                type="radio"
+                                                name={`question-${currentQuestion._id}`}
+                                                label={choice.text}
+                                                value={choice._id}
+                                                checked={answers[currentQuestion._id] === choice._id}
+                                                onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
+                                                disabled={showResults}
+                                                className={showResults && choice.isCorrect ? 'text-success fw-bold' : ''}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
                             )}
 
                             {currentQuestion.type === "trueFalse" && (
-                                <div>
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${currentQuestion._id}`}
-                                        label="True"
-                                        checked={answers[currentQuestion._id] === true}
-                                        onChange={() => handleAnswerChange(currentQuestion._id, true)}
-                                        disabled={showResults}
-                                        className={showResults && currentQuestion.correctAnswer === true ? 'text-success fw-bold' : ''}
-                                    />
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${currentQuestion._id}`}
-                                        label="False"
-                                        checked={answers[currentQuestion._id] === false}
-                                        onChange={() => handleAnswerChange(currentQuestion._id, false)}
-                                        disabled={showResults}
-                                        className={showResults && currentQuestion.correctAnswer === false ? 'text-success fw-bold' : ''}
-                                    />
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
+                                    <div>
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${currentQuestion._id}`}
+                                            label="True"
+                                            checked={answers[currentQuestion._id] === true}
+                                            onChange={() => handleAnswerChange(currentQuestion._id, true)}
+                                            disabled={showResults}
+                                            className={showResults && currentQuestion.correctAnswer === true ? 'text-success fw-bold' : ''}
+                                        />
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${currentQuestion._id}`}
+                                            label="False"
+                                            checked={answers[currentQuestion._id] === false}
+                                            onChange={() => handleAnswerChange(currentQuestion._id, false)}
+                                            disabled={showResults}
+                                            className={showResults && currentQuestion.correctAnswer === false ? 'text-success fw-bold' : ''}
+                                        />
+                                    </div>
+                                </>
                             )}
 
                             {currentQuestion.type === "fillInBlank" && (
                                 <div>
-                                    <Form.Control
-                                        type="text"
-                                        value={answers[currentQuestion._id] || ""}
-                                        onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
-                                        disabled={showResults}
-                                        placeholder="Your answer"
-                                    />
-                                    {showResults && (
-                                        <div className="text-success mt-2">
-                                            <small><strong>Correct answers:</strong> {currentQuestion.possibleAnswers.join(", ")}</small>
-                                        </div>
+                                    {currentQuestion.blanks && currentQuestion.blanks.length > 0 ? (
+                                        <>
+                                            {renderQuestionWithBlanks(currentQuestion, showResults)}
+                                            {showResults && (
+                                                <div className="mt-3 p-2 bg-light border rounded">
+                                                    <strong>Correct Answers:</strong>
+                                                    <div className="mt-2">
+                                                        {currentQuestion.blanks.map((blank: any, idx: number) => (
+                                                            <div key={blank.id} className="mb-1">
+                                                                <span className="badge bg-warning text-dark me-2">[{blank.id}]</span>
+                                                                <span className="text-success">
+                                                                    {blank.possibleAnswers.join(", ")}
+                                                                </span>
+                                                                {blank.caseSensitive && (
+                                                                    <small className="text-muted ms-2">(case sensitive)</small>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
+                                            <Form.Control
+                                                type="text"
+                                                value={answers[currentQuestion._id] || ""}
+                                                onChange={(e) => handleAnswerChange(currentQuestion._id, e.target.value)}
+                                                disabled={showResults}
+                                                placeholder="Your answer"
+                                            />
+                                            {showResults && (
+                                                <div className="text-success mt-2">
+                                                    <small><strong>Correct answers:</strong> {currentQuestion.possibleAnswers.join(", ")}</small>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             )}
@@ -266,62 +391,93 @@ export default function QuizPreview() {
                             <strong>Question {index + 1}</strong> ({question.points} pts)
                         </Card.Header>
                         <Card.Body>
-                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
-
                             {question.type === "multipleChoice" && (
-                                <div>
-                                    {getChoicesForQuestion(question).map((choice: any) => (
-                                        <Form.Check
-                                            key={choice._id}
-                                            type="radio"
-                                            name={`question-${question._id}`}
-                                            label={choice.text}
-                                            value={choice._id}
-                                            checked={answers[question._id] === choice._id}
-                                            onChange={(e) => handleAnswerChange(question._id, e.target.value)}
-                                            disabled={showResults}
-                                            className={showResults && choice.isCorrect ? 'text-success fw-bold' : ''}
-                                        />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
+                                    <div>
+                                        {getChoicesForQuestion(question).map((choice: any) => (
+                                            <Form.Check
+                                                key={choice._id}
+                                                type="radio"
+                                                name={`question-${question._id}`}
+                                                label={choice.text}
+                                                value={choice._id}
+                                                checked={answers[question._id] === choice._id}
+                                                onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                                                disabled={showResults}
+                                                className={showResults && choice.isCorrect ? 'text-success fw-bold' : ''}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
                             )}
 
                             {question.type === "trueFalse" && (
-                                <div>
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${question._id}`}
-                                        label="True"
-                                        checked={answers[question._id] === true}
-                                        onChange={() => handleAnswerChange(question._id, true)}
-                                        disabled={showResults}
-                                        className={showResults && question.correctAnswer === true ? 'text-success fw-bold' : ''}
-                                    />
-                                    <Form.Check
-                                        type="radio"
-                                        name={`question-${question._id}`}
-                                        label="False"
-                                        checked={answers[question._id] === false}
-                                        onChange={() => handleAnswerChange(question._id, false)}
-                                        disabled={showResults}
-                                        className={showResults && question.correctAnswer === false ? 'text-success fw-bold' : ''}
-                                    />
-                                </div>
+                                <>
+                                    <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
+                                    <div>
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${question._id}`}
+                                            label="True"
+                                            checked={answers[question._id] === true}
+                                            onChange={() => handleAnswerChange(question._id, true)}
+                                            disabled={showResults}
+                                            className={showResults && question.correctAnswer === true ? 'text-success fw-bold' : ''}
+                                        />
+                                        <Form.Check
+                                            type="radio"
+                                            name={`question-${question._id}`}
+                                            label="False"
+                                            checked={answers[question._id] === false}
+                                            onChange={() => handleAnswerChange(question._id, false)}
+                                            disabled={showResults}
+                                            className={showResults && question.correctAnswer === false ? 'text-success fw-bold' : ''}
+                                        />
+                                    </div>
+                                </>
                             )}
 
                             {question.type === "fillInBlank" && (
                                 <div>
-                                    <Form.Control
-                                        type="text"
-                                        value={answers[question._id] || ""}
-                                        onChange={(e) => handleAnswerChange(question._id, e.target.value)}
-                                        disabled={showResults}
-                                        placeholder="Your answer"
-                                    />
-                                    {showResults && (
-                                        <div className="text-success mt-2">
-                                            <small><strong>Correct answers:</strong> {question.possibleAnswers.join(", ")}</small>
-                                        </div>
+                                    {question.blanks && question.blanks.length > 0 ? (
+                                        <>
+                                            {renderQuestionWithBlanks(question, showResults)}
+                                            {showResults && (
+                                                <div className="mt-3 p-2 bg-light border rounded">
+                                                    <strong>Correct Answers:</strong>
+                                                    <div className="mt-2">
+                                                        {question.blanks.map((blank: any) => (
+                                                            <div key={blank.id} className="mb-1">
+                                                                <span className="badge bg-warning text-dark me-2">[{blank.id}]</span>
+                                                                <span className="text-success">
+                                                                    {blank.possibleAnswers.join(", ")}
+                                                                </span>
+                                                                {blank.caseSensitive && (
+                                                                    <small className="text-muted ms-2">(case sensitive)</small>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="mb-3" dangerouslySetInnerHTML={{ __html: question.question }} />
+                                            <Form.Control
+                                                type="text"
+                                                value={answers[question._id] || ""}
+                                                onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                                                disabled={showResults}
+                                                placeholder="Your answer"
+                                            />
+                                            {showResults && (
+                                                <div className="text-success mt-2">
+                                                    <small><strong>Correct answers:</strong> {question.possibleAnswers.join(", ")}</small>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             )}

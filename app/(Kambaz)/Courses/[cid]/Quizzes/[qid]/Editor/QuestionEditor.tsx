@@ -1,6 +1,6 @@
 "use client"
 import { useState, useRef, useEffect } from "react";
-import { Form, Button, Card } from "react-bootstrap";
+import { Form, Button, Card, Badge, Alert } from "react-bootstrap";
 import { FaSave, FaTimes, FaPlus, FaTrash } from "react-icons/fa";
 import { v4 as uuidv4 } from "uuid";
 
@@ -19,6 +19,18 @@ export default function QuestionEditor({ question, onSave, onCancel, isNew }: Qu
     useEffect(() => {
         if (editorRef.current) {
             editorRef.current.innerHTML = editedQuestion.question || "";
+        }
+        
+        // Initialize blanks array for fillInBlank if it doesn't exist
+        if (editedQuestion.type === "fillInBlank" && !editedQuestion.blanks) {
+            setEditedQuestion({
+                ...editedQuestion,
+                blanks: [{
+                    id: "blank0",
+                    possibleAnswers: [""],
+                    caseSensitive: false
+                }]
+            });
         }
     }, []);
 
@@ -54,28 +66,122 @@ export default function QuestionEditor({ question, onSave, onCancel, isNew }: Qu
         setEditedQuestion({ ...editedQuestion, choices: newChoices });
     };
 
-    const handleAddPossibleAnswer = () => {
-        const newAnswers = [...(editedQuestion.possibleAnswers || []), ""];
-        setEditedQuestion({ ...editedQuestion, possibleAnswers: newAnswers });
+    // ========== NEW: Fill in the Blank with Multiple Blanks ==========
+    
+    // Add a new blank
+    const handleAddBlank = () => {
+        const blanks = editedQuestion.blanks || [];
+        const newBlankId = `blank${blanks.length}`;
+        const newBlanks = [...blanks, {
+            id: newBlankId,
+            possibleAnswers: [""],
+            caseSensitive: false
+        }];
+        setEditedQuestion({ ...editedQuestion, blanks: newBlanks });
     };
 
-    const handleRemovePossibleAnswer = (index: number) => {
-        const newAnswers = editedQuestion.possibleAnswers.filter((_: any, i: number) => i !== index);
-        setEditedQuestion({ ...editedQuestion, possibleAnswers: newAnswers });
+    // Remove a blank
+    const handleRemoveBlank = (index: number) => {
+        const newBlanks = editedQuestion.blanks.filter((_: any, i: number) => i !== index);
+        // Re-index blank IDs
+        const reindexedBlanks = newBlanks.map((blank: any, i: number) => ({
+            ...blank,
+            id: `blank${i}`
+        }));
+        setEditedQuestion({ ...editedQuestion, blanks: reindexedBlanks });
     };
 
-    const handlePossibleAnswerChange = (index: number, value: string) => {
-        const newAnswers = [...editedQuestion.possibleAnswers];
-        newAnswers[index] = value;
-        setEditedQuestion({ ...editedQuestion, possibleAnswers: newAnswers });
+    // Update blank's case sensitivity
+    const handleBlankCaseSensitiveChange = (blankIndex: number, value: boolean) => {
+        const newBlanks = [...editedQuestion.blanks];
+        newBlanks[blankIndex] = { ...newBlanks[blankIndex], caseSensitive: value };
+        setEditedQuestion({ ...editedQuestion, blanks: newBlanks });
+    };
+
+    // Add a possible answer to a specific blank
+    const handleAddPossibleAnswerToBlank = (blankIndex: number) => {
+        const newBlanks = [...editedQuestion.blanks];
+        newBlanks[blankIndex] = {
+            ...newBlanks[blankIndex],
+            possibleAnswers: [...newBlanks[blankIndex].possibleAnswers, ""]
+        };
+        setEditedQuestion({ ...editedQuestion, blanks: newBlanks });
+    };
+
+    // Remove a possible answer from a specific blank
+    const handleRemovePossibleAnswerFromBlank = (blankIndex: number, answerIndex: number) => {
+        const newBlanks = [...editedQuestion.blanks];
+        newBlanks[blankIndex] = {
+            ...newBlanks[blankIndex],
+            possibleAnswers: newBlanks[blankIndex].possibleAnswers.filter((_: any, i: number) => i !== answerIndex)
+        };
+        setEditedQuestion({ ...editedQuestion, blanks: newBlanks });
+    };
+
+    // Update a possible answer for a specific blank
+    const handlePossibleAnswerChangeForBlank = (blankIndex: number, answerIndex: number, value: string) => {
+        const newBlanks = [...editedQuestion.blanks];
+        const newAnswers = [...newBlanks[blankIndex].possibleAnswers];
+        newAnswers[answerIndex] = value;
+        newBlanks[blankIndex] = {
+            ...newBlanks[blankIndex],
+            possibleAnswers: newAnswers
+        };
+        setEditedQuestion({ ...editedQuestion, blanks: newBlanks });
+    };
+
+    // Insert blank placeholder into question text
+    const handleInsertBlankPlaceholder = (blankId: string) => {
+        if (editorRef.current) {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const placeholder = document.createElement('span');
+                placeholder.className = 'blank-placeholder bg-warning px-2 py-1 rounded';
+                placeholder.contentEditable = 'false';
+                placeholder.textContent = `[${blankId}]`;
+                range.insertNode(placeholder);
+                range.collapse(false);
+                handleEditorChange();
+            }
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
         // Capture final editor content before saving
         if (editorRef.current) {
             editedQuestion.question = editorRef.current.innerHTML;
         }
+
+        // Validation for fillInBlank
+        if (editedQuestion.type === "fillInBlank") {
+            const blanks = editedQuestion.blanks || [];
+            
+            // Check if all blanks have at least one answer
+            const hasEmptyBlanks = blanks.some((blank: any) => 
+                !blank.possibleAnswers || blank.possibleAnswers.length === 0 || 
+                blank.possibleAnswers.every((a: string) => !a.trim())
+            );
+            
+            if (hasEmptyBlanks) {
+                alert("Each blank must have at least one possible answer!");
+                return;
+            }
+
+            // Check if question text contains all blank placeholders
+            const questionText = editorRef.current?.textContent || "";
+            const missingBlanks = blanks.filter((blank: any) => 
+                !questionText.includes(`[${blank.id}]`)
+            );
+            
+            if (missingBlanks.length > 0) {
+                alert(`Question text is missing placeholders for: ${missingBlanks.map((b: any) => b.id).join(", ")}`);
+                return;
+            }
+        }
+
         onSave(editedQuestion);
     };
 
@@ -91,7 +197,21 @@ export default function QuestionEditor({ question, onSave, onCancel, isNew }: Qu
                         <Form.Label>Question Type</Form.Label>
                         <Form.Select
                             value={editedQuestion.type}
-                            onChange={(e) => handleChange("type", e.target.value)}
+                            onChange={(e) => {
+                                const newType = e.target.value;
+                                const updates: any = { type: newType };
+                                
+                                // Initialize fillInBlank structure when switching to it
+                                if (newType === "fillInBlank" && !editedQuestion.blanks) {
+                                    updates.blanks = [{
+                                        id: "blank0",
+                                        possibleAnswers: [""],
+                                        caseSensitive: false
+                                    }];
+                                }
+                                
+                                setEditedQuestion({ ...editedQuestion, ...updates });
+                            }}
                         >
                             <option value="multipleChoice">Multiple Choice</option>
                             <option value="trueFalse">True/False</option>
@@ -103,7 +223,8 @@ export default function QuestionEditor({ question, onSave, onCancel, isNew }: Qu
                     <Form.Group className="mb-3">
                         <Form.Label>Title</Form.Label>
                         <Form.Control
-                            type="text"
+                            // type="text"
+                            as="textarea"
                             value={editedQuestion.title}
                             onChange={(e) => handleChange("title", e.target.value)}
                             required
@@ -223,7 +344,8 @@ export default function QuestionEditor({ question, onSave, onCancel, isNew }: Qu
                                         label=""
                                     />
                                     <Form.Control
-                                        type="text"
+                                        // type="text"
+                                        as="textarea"
                                         value={choice.text}
                                         onChange={(e) => handleChoiceChange(index, "text", e.target.value)}
                                         placeholder={`Choice ${index + 1}`}
@@ -296,60 +418,118 @@ export default function QuestionEditor({ question, onSave, onCancel, isNew }: Qu
                         </>
                     )}
 
-                    {/* Fill in the Blank Options */}
+                    {/* Fill in the Blank Options - NEW IMPLEMENTATION */}
                     {editedQuestion.type === "fillInBlank" && (
                         <div className="mb-3">
-                            <Form.Label>Possible Correct Answers</Form.Label>
-                            {editedQuestion.possibleAnswers?.map((answer: string, index: number) => (
-                                <div key={index} className="d-flex gap-2 mb-2">
-                                    <Form.Control
-                                        type="text"
-                                        value={answer}
-                                        onChange={(e) => handlePossibleAnswerChange(index, e.target.value)}
-                                        placeholder={`Answer ${index + 1}`}
-                                        required
-                                    />
-                                    {editedQuestion.possibleAnswers.length > 1 && (
-                                        <Button
-                                            variant="outline-danger"
-                                            size="sm"
-                                            onClick={() => handleRemovePossibleAnswer(index)}
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <Form.Label className="mb-0">Blanks Configuration</Form.Label>
+                                <Button 
+                                    variant="success" 
+                                    size="sm" 
+                                    onClick={handleAddBlank}
+                                    type="button"
+                                >
+                                    <FaPlus className="me-1" />
+                                    Add Blank
+                                </Button>
+                            </div>
+
+                            <Alert variant="info" className="small">
+                                <strong>Instructions:</strong>
+                                <ul className="mb-0 mt-2">
+                                    <li>Create blanks below and click "Insert" to add them to your question text</li>
+                                    {/* <li>Each blank can have multiple correct answers</li> */}
+                                    <li>Blanks will appear as <Badge bg="warning" text="dark">[blank0]</Badge>, <Badge bg="warning" text="dark">[blank1]</Badge>, etc.</li>
+                                </ul>
+                            </Alert>
+
+                            {editedQuestion.blanks?.map((blank: any, blankIndex: number) => (
+                                <Card key={blank.id} className="mb-3 border-secondary">
+                                    <Card.Header className="bg-light d-flex justify-content-between align-items-center">
+                                        <span>
+                                            <Badge bg="warning" text="dark" className="me-2">[{blank.id}]</Badge>
+                                            <strong>Blank {blankIndex + 1}</strong>
+                                        </span>
+                                        <div className="d-flex gap-2">
+                                            <Button
+                                                variant="outline-primary"
+                                                size="sm"
+                                                onClick={() => handleInsertBlankPlaceholder(blank.id)}
+                                                type="button"
+                                            >
+                                                Insert into Question
+                                            </Button>
+                                            {editedQuestion.blanks.length > 1 && (
+                                                <Button
+                                                    variant="outline-danger"
+                                                    size="sm"
+                                                    onClick={() => handleRemoveBlank(blankIndex)}
+                                                    type="button"
+                                                >
+                                                    <FaTrash />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </Card.Header>
+                                    <Card.Body>
+                                        {/* Possible Answers for this blank */}
+                                        <Form.Label className="small">Possible Correct Answers</Form.Label>
+                                        {blank.possibleAnswers?.map((answer: string, answerIndex: number) => (
+                                            <div key={answerIndex} className="d-flex gap-2 mb-2">
+                                                <Form.Control
+                                                    // type="text"
+                                                    as="textarea"
+                                                    rows={2}
+                                                    value={answer}
+                                                    onChange={(e) => handlePossibleAnswerChangeForBlank(blankIndex, answerIndex, e.target.value)}
+                                                    placeholder={`Answer ${answerIndex + 1}`}
+                                                    size="sm"
+                                                    required
+                                                />
+                                                {blank.possibleAnswers.length > 1 && (
+                                                    <Button
+                                                        variant="outline-danger"
+                                                        size="sm"
+                                                        onClick={() => handleRemovePossibleAnswerFromBlank(blankIndex, answerIndex)}
+                                                        type="button"
+                                                    >
+                                                        <FaTrash />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                        <Button 
+                                            variant="outline-secondary" 
+                                            size="sm" 
+                                            onClick={() => handleAddPossibleAnswerToBlank(blankIndex)}
                                             type="button"
                                         >
-                                            <FaTrash />
+                                            <FaPlus className="me-1" />
+                                            Add Answer
                                         </Button>
-                                    )}
-                                </div>
-                            ))}
-                            <Button 
-                                variant="outline-secondary" 
-                                size="sm" 
-                                onClick={handleAddPossibleAnswer}
-                                type="button"
-                            >
-                                <FaPlus className="me-1" />
-                                Add Answer
-                            </Button>
-                            
-                            <Form.Group className="mt-3">
-                                <Form.Check
-                                    type="checkbox"
-                                    label="Case Sensitive"
-                                    checked={editedQuestion.caseSensitive}
-                                    onChange={(e) => handleChange("caseSensitive", e.target.checked)}
-                                />
-                            </Form.Group>
 
-                            {/* Show Correct Answers */}
-                            <div className="mt-3 p-2 bg-light border rounded">
-                                <strong>Correct Answers: </strong>
-                                <span className="text-success">
-                                    {editedQuestion.possibleAnswers?.filter((a: string) => a.trim()).join(", ") || "None"}
-                                </span>
-                                {editedQuestion.caseSensitive && (
-                                    <span className="text-muted ms-2">(Case sensitive)</span>
-                                )}
-                            </div>
+                                        {/* Case Sensitive Option */}
+                                        <Form.Check
+                                            type="checkbox"
+                                            label="Case Sensitive"
+                                            checked={blank.caseSensitive}
+                                            onChange={(e) => handleBlankCaseSensitiveChange(blankIndex, e.target.checked)}
+                                            className="mt-2"
+                                        />
+
+                                        {/* Show Answers Preview */}
+                                        <div className="mt-2 p-2 bg-light border rounded small">
+                                            <strong>Accepts: </strong>
+                                            <span className="text-success">
+                                                {blank.possibleAnswers?.filter((a: string) => a.trim()).join(", ") || "No answers yet"}
+                                            </span>
+                                            {blank.caseSensitive && (
+                                                <Badge bg="secondary" className="ms-2">Case sensitive</Badge>
+                                            )}
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            ))}
                         </div>
                     )}
 

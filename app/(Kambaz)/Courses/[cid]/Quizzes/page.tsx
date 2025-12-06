@@ -112,7 +112,7 @@ export default function Quizzes() {
         if (!availableDate) return "Not available";
         if (now < availableDate) return `Not available until ${formatDate(quiz.availableDate)}`;
         if (untilDate && now > untilDate) return "Closed";
-        return "Available";
+        return `Available ${formatDate(quiz.availableDate)} `;
     };
 
     // Get score badge color
@@ -122,6 +122,13 @@ export default function Quizzes() {
         if (percentage >= 50) return "warning";
         return "danger";
     };
+
+     // Sort quizzes by available date
+     const sortedQuizzes = [...quizzes].sort((a, b) => {
+        const dateA = a.availableDate ? new Date(a.availableDate).getTime() : 0;
+        const dateB = b.availableDate ? new Date(b.availableDate).getTime() : 0;
+        return dateA - dateB; // Earliest date first
+    });
 
     return (
         <div id="wd-quizzes">
@@ -143,7 +150,7 @@ export default function Quizzes() {
                         </div>
                     </ListGroupItem>
 
-                    {quizzes.map((quiz: any) => {
+                    {sortedQuizzes.map((quiz: any) => {
                         const studentAttempt = quizScores[quiz._id];
 
                         return (
@@ -207,7 +214,9 @@ export default function Quizzes() {
                                     {isFaculty && (
                                         <QuizContextMenu
                                             quizId={quiz._id}
+                                            published={quiz.published}
                                             onDelete={handleDeleteQuiz}
+                                            onTogglePublish={handleTogglePublish}
                                         />
                                     )}
                                 </div>
