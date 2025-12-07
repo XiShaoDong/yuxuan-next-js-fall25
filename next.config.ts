@@ -5,9 +5,6 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['www.staradvertiser.com'], // Lab1 line 164: allow Imge to fetch img from outside domain
   },
-  eslint:{
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;
