@@ -170,7 +170,7 @@ export default function Quizzes() {
                                                 <div className="text-muted small">
                                                     <span className="fw-bold">{getAvailabilityStatus(quiz)}</span>
                                                     {quiz.dueDate && (
-                                                        <> | <strong>Due</strong> {formatDate(quiz.dueDate)}</>
+                                                        <> | <strong>kambaz-due</strong> {formatDate(quiz.dueDate)}</>
                                                     )}
                                                     {" | "}{quiz.points} pts
                                                     {" | "}{quiz.questions?.length || 0} Questions
