@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Course, Module, User } from "../types";
 const axiosWithCredentials = axios.create({ withCredentials: true });
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
@@ -10,13 +11,13 @@ export const fetchAllCourses = async () => {
     return data;
 };
 
-export const findMyCourses = async (user: any) => {
+export const findMyCourses = async (user: Pick<User, "_id">) => {
     const { data } = await axiosWithCredentials.get(`${USERS_API}/${user._id}/courses`);
     return data;
 };
 
 
-export const createCourse = async (course: any) => {
+export const createCourse = async (course: Omit<Course, "_id">) => {
     const { data } = await axiosWithCredentials.post(`${USERS_API}/current/courses`, course);
     return data;
 };
@@ -28,7 +29,7 @@ export const deleteCourse = async (id: string) => {
 };
 
 
-export const updateCourse = async (course: any) => {
+export const updateCourse = async (course: Course) => {
     const { data } = await axios
         .put(`${COURSES_API}/${course._id}`, course);
     return data;
@@ -47,15 +48,19 @@ export const findModulesForCourse = async (courseId: string) => {
     return response.data;
 };
 
-export const createModuleForCourse = async (courseId: string, module: any) => {
-    const response = await axios.post(`${COURSES_API}/${courseId}/modules`,
+export const createModuleForCourse = async (
+    courseId: string | string[],
+    module: { name: string; course: string | string[] }
+) => {
+    const normalizedCourseId = Array.isArray(courseId) ? courseId[0] : courseId;
+    const response = await axios.post(`${COURSES_API}/${normalizedCourseId}/modules`,
         module
     );
     return response.data;
 };
 
 
-export const updateModule = async (courseId: string, module: any) => {
+export const updateModule = async (courseId: string, module: Module) => {
     const { data } = await axios.put(
         `${COURSES_API}/${courseId}/modules/${module._id}`,
         module

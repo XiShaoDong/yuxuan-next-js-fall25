@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Assignment } from "../../../types";
 const axiosWithCredentials = axios.create({ withCredentials: true });
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
@@ -15,8 +16,15 @@ export const findMyAssignments = async (courseId:string) => {
 };
 
 
-export const createAssignment = async (courseId:string, assignment: any) => {
-    const { data } = await axiosWithCredentials.post(`${ASSIGNMENTS_API}/${courseId}`, assignment);
+export const createAssignment = async (
+    courseId: string | string[],
+    assignment: Partial<Omit<Assignment, "_id" | "course">> & {
+        title: string;
+        course: string | string[];
+    }
+) => {
+    const normalizedCourseId = Array.isArray(courseId) ? courseId[0] : courseId;
+    const { data } = await axiosWithCredentials.post(`${ASSIGNMENTS_API}/${normalizedCourseId}`, assignment);
     return data;
 };
 
@@ -27,7 +35,7 @@ export const deleteAssignment= async (id: string) => {
 };
 
 
-export const updateAssignment = async (assignment: any) => {
+export const updateAssignment = async (assignment: Assignment) => {
     const { data } = await axios
         .put(`${ASSIGNMENTS_API}/${assignment._id}`, assignment);
     return data;

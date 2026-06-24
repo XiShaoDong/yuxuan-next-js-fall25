@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { QuizAttemptPayload, QuizAttempt } from "../../../../types";
 
 const axiosWithCredentials = axios.create({ withCredentials: true });
 export const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
@@ -22,7 +23,7 @@ export const getLatestAttempt = async (studentId: string, quizId: string) => {
 
 
 // Submit quiz attempt
-export const submitQuizAttempt = async (quizId: string, attemptData: any) => {
+export const submitQuizAttempt = async (quizId: string, attemptData: QuizAttemptPayload): Promise<QuizAttempt> => {
     const { data } = await axiosWithCredentials.post(
         `${ATTEMPTS_API}/quiz/${quizId}`,
         attemptData

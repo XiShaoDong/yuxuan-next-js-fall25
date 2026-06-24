@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Question, Quiz } from "../../../types";
 
 const axiosWithCredentials = axios.create({ withCredentials: true });
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
@@ -29,16 +30,39 @@ export const findQuizById = async (quizId: string) => {
 };
 
 // Create a new quiz
-export const createQuiz = async (courseId: string, quiz: any) => {
+export const createQuiz = async (
+    courseId: string | string[],
+    quiz: {
+        title: string;
+        description?: string;
+        quizType?: string;
+        points?: number;
+        assignmentGroup?: string;
+        shuffleAnswers?: boolean;
+        timeLimit?: number;
+        multipleAttempts?: boolean;
+        howManyAttempts?: number;
+        showCorrectAnswers?: string;
+        accessCode?: string;
+        oneQuestionAtTime?: boolean;
+        webcamRequired?: boolean;
+        lockQuestionsAfterAnswering?: boolean;
+        dueDate?: string | Date;
+        availableDate?: string | Date;
+        untilDate?: string | Date;
+        published?: boolean;
+    }
+) => {
+    const normalizedCourseId = Array.isArray(courseId) ? courseId[0] : courseId;
     const { data } = await axiosWithCredentials.post(
-        `${QUIZZES_API}/${courseId}`,
+        `${QUIZZES_API}/${normalizedCourseId}`,
         quiz
     );
     return data;
 };
 
 // Update a quiz
-export const updateQuiz = async (quiz: any) => {
+export const updateQuiz = async (quiz: Quiz) => {
     const { data } = await axiosWithCredentials.put(
         `${QUIZZES_API}/${quiz._id}`,
         quiz
@@ -63,7 +87,7 @@ export const togglePublishQuiz = async (quizId: string) => {
 };
 
 // Question operations
-export const addQuestion = async (quizId: string, question: any) => {
+export const addQuestion = async (quizId: string, question: Question) => {
     const { data } = await axiosWithCredentials.post(
         `${QUIZZES_API}/${quizId}/questions`,
         question
@@ -71,7 +95,7 @@ export const addQuestion = async (quizId: string, question: any) => {
     return data;
 };
 
-export const updateQuestion = async (quizId: string, questionId: string, question: any) => {
+export const updateQuestion = async (quizId: string, questionId: string, question: Question) => {
     const { data } = await axiosWithCredentials.put(
         `${QUIZZES_API}/${quizId}/questions/${questionId}`,
         question

@@ -1,19 +1,26 @@
 import axios from "axios";
+import type { User } from "../types";
+
 const axiosWithCredentials = axios.create({ withCredentials: true });
 export const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 export const USERS_API = `${HTTP_SERVER}/api/users`;
 
-export const signin = async (credentials: any) => {
+export interface Credentials {
+    username: string;
+    password: string;
+}
+
+export const signin = async (credentials: Credentials): Promise<User> => {
     const response = await axiosWithCredentials.post(`${USERS_API}/signin`, credentials);
     return response.data;
 };
 
-export const signup = async (user: any) => {
+export const signup = async (user: Partial<User>): Promise<User> => {
     const response = await axiosWithCredentials.post(`${USERS_API}/signup`, user);
     return response.data;
 };
 
-export const updateUser = async (user: any) => {
+export const updateUser = async (user: User): Promise<User> => {
     const response = await axiosWithCredentials.put(`${USERS_API}/${user._id}`, user);
     return response.data;
 };
@@ -57,7 +64,7 @@ export const deleteUser = async (userId: string) => {
 };
 
 
-export const createUser = async (user: any) => {
+export const createUser = async (user: Partial<User>): Promise<User> => {
     const response = await axios.post(`${USERS_API}`, user);
     return response.data;
 };

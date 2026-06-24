@@ -2,14 +2,16 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Button, Card, Form, Alert, ProgressBar, ButtonGroup } from "react-bootstrap";
+import { Button, Card, Form, Alert, ProgressBar } from "react-bootstrap";
 import * as client from "../client";
 import * as quizClient from "../../client";
+import { shuffleArray } from "./utils";
+import type { RootState } from "../../../../../store";
 
 export default function QuizAttempt() {
     const { cid, qid } = useParams();
     const router = useRouter();
-    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const { currentUser } = useSelector((state: RootState) => state.accountReducer);
 
     const [quiz, setQuiz] = useState<any>(null);
     const [answers, setAnswers] = useState<any>({});
@@ -20,16 +22,6 @@ export default function QuizAttempt() {
     const [startTime] = useState(Date.now());
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [shuffledChoices, setShuffledChoices] = useState<{ [key: string]: any[] }>({});
-
-    // Shuffle array function
-    const shuffleArray = (array: any[]) => {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-    };
 
     useEffect(() => {
         const fetchQuizAndAttempts = async () => {
@@ -46,6 +38,10 @@ export default function QuizAttempt() {
                         }
                     });
                     setShuffledChoices(shuffled);
+                }
+
+                if (!currentUser) {
+                    return;
                 }
 
                 const attempts = await client.getStudentAttempts(currentUser._id, qid as string);

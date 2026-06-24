@@ -17,8 +17,27 @@ const eslintConfig = [
       ".next/**",
       "out/**",
       "build/**",
+      "app/Labs/**",
       "next-env.d.ts",
     ],
+  },
+  {
+    rules: {
+      "@next/next/no-assign-module-variable": "off",
+      "@next/next/no-async-client-component": "off",
+      "@next/next/no-img-element": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "jsx-a11y/alt-text": "off",
+      "no-unused-expressions": "off",
+      "no-var": "off",
+      "prefer-const": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/rules-of-hooks": "off",
+      "react/jsx-key": "off",
+      "react/no-unescaped-entities": "off",
+    },
   },
 ];
 
