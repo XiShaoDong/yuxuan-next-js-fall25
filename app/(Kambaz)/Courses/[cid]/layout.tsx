@@ -2,7 +2,6 @@
 import { ReactNode } from "react";
 import CourseNavigation from "./Navigation";
 import { FaAlignJustify } from "react-icons/fa";
-import { courses } from "../../Database"
 import Breadcrumb from "./Breadcrumb";
 import { useParams } from "next/navigation";
 import Link from "next/link";

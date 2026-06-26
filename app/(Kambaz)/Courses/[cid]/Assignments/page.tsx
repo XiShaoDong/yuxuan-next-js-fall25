@@ -5,7 +5,6 @@ import { ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import AssignmentsButton from "./AssignmentsButton";
 import AssignmentItemButtons from "./AssignmentItemButtons";
-import * as db from "../../../Database"
 import { useParams } from "next/navigation";
 
 import { useDispatch, useSelector } from "react-redux";

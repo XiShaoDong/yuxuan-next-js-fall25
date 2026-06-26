@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { assignments } from "../../../Database";
 import { v4 as uuidv4 } from "uuid";
 import type { Assignment } from "../../../types";
 
@@ -10,9 +9,7 @@ interface AssignmentsState {
 type AssignmentInput = Partial<Omit<Assignment, "_id">> & Pick<Assignment, "title" | "course">;
 
 const initialState: AssignmentsState = {
-    assignments: assignments,
-    // @Todo Maybe not neccessary, just prevent auto fetch from database
-    // assignments: [],
+    assignments: [],
 
 };
 
