@@ -1,0 +1,53 @@
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "react-bootstrap";
+import { FaBan, FaPlus } from "react-icons/fa6";
+import GreenCheckmark from "./GreenCheckmark";
+import { FaTimesCircle } from "react-icons/fa";
+import UnpublicIcon from "./UnpublicIcon";
+import { useState } from "react";
+import ModuleEditor from "./ModuleEditor";
+export default function ModulesControls({ moduleName, setModuleName, addModule }:
+  { moduleName: string; setModuleName: (title: string) => void; addModule: () => void; }) {
+   const [show, setShow] = useState(false);
+   const handleClose = () => setShow(false);
+   const handleShow = () => setShow(true);
+ return (
+   <div id="wd-modules-controls" className="text-nowrap">
+    
+     <Button variant="danger" onClick={handleShow} size="lg" className="me-1 float-end" id="wd-add-module-btn">
+       <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+       Module
+     </Button>
+     <Dropdown className="float-end me-2">
+       <DropdownToggle variant="secondary" size="lg" id="wd-publish-all-btn">
+         <GreenCheckmark /> Publish All
+       </DropdownToggle>
+       <DropdownMenu>
+         <DropdownItem id="wd-publish-all-modules-and-items">
+           <GreenCheckmark /> Publish all modules and items
+         </DropdownItem>
+         <DropdownItem id="wd-publish-modules-only">
+           <GreenCheckmark /> Publish modules only
+         </DropdownItem>
+            {/*  #Mark Finished to add two dropdown */}
+         <DropdownItem id="wd-unpublish-all-modules-and-items">
+           <UnpublicIcon  /> Unpublish all modules and items
+         </DropdownItem>
+
+         <DropdownItem id="wd-unpublish-modules-only">
+           <UnpublicIcon /> Unpublish modules only
+         </DropdownItem>
+        
+       </DropdownMenu>
+     </Dropdown>
+    {/* #Mark Finished to add two buttons */}
+     <Button variant="secondary" size="lg" className="me-1 float-end" id="wd-add-module-btn">
+        Veiw Progress
+     </Button>
+
+     <Button variant="secondary" size="lg" className="me-1 float-end" id="wd-add-module-btn">
+        Collapse All
+     </Button>
+     <ModuleEditor show={show} handleClose={handleClose} dialogTitle="Add Module"
+       moduleName={moduleName} setModuleName={setModuleName} addModule={addModule} />
+   </div>
+);}

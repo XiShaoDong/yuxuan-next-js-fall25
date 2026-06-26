@@ -1,35 +1,23 @@
+'use client'
+import { useSelector } from "react-redux";
 import Modules from "../Modules/page";
 import CourseStatus from "./status";
+import Link from "next/link";
 export default function Home() {
   return (
     <div id="wd-home">
-      <table>
-        <tbody>
-          <tr>
-            <button>
-              Collapese All
-            </button>
-            <button>
-              View Progress
-            </button>
-            <select>
-              <option value="Publish All">
-                Publish All
-              </option>
-              <option value="Hide All">
-                Hide All
-              </option>
-            </select>
-            <button>
-              + Module
-            </button>
-          </tr>
-          <tr>
-            <td valign="top" width="70%"> <Modules /> </td>
-            <td valign="top"> <CourseStatus /> </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="d-flex" id="wd-home">
+        <div className="flex-fill me-3">
+          <Modules />
+        </div>
+
+        <div className="d-none d-lg-block">
+          <CourseStatus />
+        </div>
+      </div>
+
+
     </div>
+
   );
 }
