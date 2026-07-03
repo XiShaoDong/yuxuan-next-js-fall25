@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { courses } from "../Database";
 import { v4 as uuidv4 } from "uuid";
 import type { Course } from "../types";
 
@@ -10,7 +9,7 @@ interface CoursesState {
 type CourseInput = Omit<Course, "_id">;
 
 const initialState: CoursesState = {
-    courses: courses,
+    courses: [],
 };
 const coursesSlice = createSlice({
     name: "courses",

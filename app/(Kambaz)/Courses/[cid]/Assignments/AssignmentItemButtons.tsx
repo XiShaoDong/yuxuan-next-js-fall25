@@ -2,7 +2,6 @@ import React from 'react'
 import GreenCheckmark from '../Modules/GreenCheckmark'
 import { IoEllipsisVertical } from 'react-icons/io5'
 import { FaTrash } from 'react-icons/fa6'
-import { assignments } from '@/app/(Kambaz)/Database'
 
 function AssignmentItemButtons(
   { deleteAssignment, assignmentId }:

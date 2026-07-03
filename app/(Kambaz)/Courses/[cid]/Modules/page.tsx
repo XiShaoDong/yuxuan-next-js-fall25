@@ -6,7 +6,6 @@ import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import * as db from "../../../Database";
 
 import { v4 as uuidv4 } from "uuid";
 

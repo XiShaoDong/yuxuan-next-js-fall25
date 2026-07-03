@@ -4,7 +4,6 @@ import { redirect } from "next/dist/client/components/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import * as db from "../../Database";
 import { FormControl, Button } from "react-bootstrap";
 import * as client from "../client";
 
