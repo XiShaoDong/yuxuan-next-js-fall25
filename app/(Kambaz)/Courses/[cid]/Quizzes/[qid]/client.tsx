@@ -46,3 +46,11 @@ export const getQuizAttempts = async (quizId: string) => {
     );
     return data;
 };
+
+// Get AI Tutor feedback for a quiz attempt
+export const getAITutorFeedback = async (attemptId: string) => {
+    const { data } = await axiosWithCredentials.post(
+        `${ATTEMPTS_API}/${attemptId}/ai-tutor`
+    );
+    return data;
+};
