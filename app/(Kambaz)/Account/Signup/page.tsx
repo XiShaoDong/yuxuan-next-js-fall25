@@ -15,12 +15,13 @@ export default function Signup() {
   });
   const [error, setError] = useState("");
   const dispatch = useDispatch();
+  const router = useRouter();
   const signup = async () => {
     setError("");
     try {
       const currentUser = await client.signup(user);
       dispatch(setCurrentUser(currentUser));
-      useRouter().push("/Account/Profile");
+      router.push("/Account/Profile");
     } catch (err: any) {
       setError(err.response?.data?.message || "Signup failed. Please try again.");
     }

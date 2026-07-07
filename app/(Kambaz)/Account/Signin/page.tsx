@@ -12,11 +12,12 @@ export default function Signin() {
 
   const [credentials, setCredentials] = useState<any>({ username: "iron_man", password: "stark123" });
   const dispatch = useDispatch();
+  const router = useRouter();
   const signin = async() => {
     const user =  await client.signin(credentials);
     if (!user) return;
     dispatch(setCurrentUser(user));
-    useRouter().push("/Account/Profile");
+    router.push("/Account/Profile");
   };
 
   console.log("@NEXT_PUBLIC_HTTP_SERVER:", process.env.NEXT_PUBLIC_HTTP_SERVER);
