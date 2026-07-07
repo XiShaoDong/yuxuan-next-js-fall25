@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import {useRouter} from "next/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
@@ -20,7 +20,7 @@ export default function Signup() {
     try {
       const currentUser = await client.signup(user);
       dispatch(setCurrentUser(currentUser));
-      redirect("/Account/Profile");
+      useRouter().push("/Account/Profile");
     } catch (err: any) {
       setError(err.response?.data?.message || "Signup failed. Please try again.");
     }
@@ -43,3 +43,4 @@ export default function Signup() {
     </div>
   );
 }
+

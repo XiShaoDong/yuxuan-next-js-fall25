@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/dist/client/components/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormControl, Button } from "react-bootstrap";
 import * as client from "../client";
@@ -15,7 +16,7 @@ export default function Signin() {
     const user =  await client.signin(credentials);
     if (!user) return;
     dispatch(setCurrentUser(user));
-    redirect("/Dashboard");
+    useRouter().push("/Account/Profile");
   };
 
   console.log("@NEXT_PUBLIC_HTTP_SERVER:", process.env.NEXT_PUBLIC_HTTP_SERVER);

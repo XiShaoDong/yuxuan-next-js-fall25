@@ -19,7 +19,24 @@ export default function Session({ children }: { children: ReactNode }) {
     useEffect(() => {
         fetchProfile();
     }, []);
-    if (!pending) {
-        return children;
-    }
+    if (pending) {  
+        return (  
+            <div  
+                style={{  
+                    display: "flex",  
+                    flexDirection: "column",  
+                    alignItems: "center",  
+                    justifyContent: "center",  
+                    minHeight: "100vh",  
+                    gap: "12px",  
+                }}  
+            >  
+                <div className="spinner-border text-primary" role="status">  
+                    <span className="visually-hidden">Loading...</span>  
+                </div>  
+                <div>Loading…</div>  
+            </div>  
+        );  
+    }  
+    return children; 
 }
